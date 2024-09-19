@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  silkroad-app:
+    build: ./
+    command: ./wait-for-postgres.sh db ./silkroad
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
+
+  db:
+    restart: always
+    image: postgres:latest
+    volumes:
+      - ./.database/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - 5436:5432

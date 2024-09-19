@@ -1,0 +1,379 @@
+basePath: /api
+definitions:
+  forms.ContactForm:
+    properties:
+      description:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+      tour_id:
+        type: integer
+    required:
+    - description
+    - email
+    - name
+    - phone
+    type: object
+  forms.HelpWithTourForm:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+      place:
+        type: string
+      when_date:
+        type: string
+    required:
+    - name
+    - phone
+    - place
+    - when_date
+    type: object
+  http.errorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  http.getAllToursResponse:
+    properties:
+      tours:
+        items:
+          $ref: '#/definitions/tour.Tour'
+        type: array
+    type: object
+  tour.CalendarType:
+    additionalProperties:
+      additionalProperties:
+        $ref: '#/definitions/tour.TimeSlot'
+      type: object
+    type: object
+  tour.TimeSlot:
+    properties:
+      from:
+        type: string
+      to:
+        type: string
+    type: object
+  tour.Tour:
+    properties:
+      activity:
+        items:
+          type: string
+        type: array
+      calendar:
+        $ref: '#/definitions/tour.CalendarType'
+      currency:
+        type: string
+      description_excursion:
+        type: string
+      description_route:
+        type: string
+      duration:
+        type: integer
+      id:
+        type: integer
+      physical_rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+      price:
+        type: integer
+      quantity:
+        type: integer
+      season:
+        type: string
+      tariff:
+        type: string
+      title:
+        type: string
+      tour_date:
+        type: string
+      tour_place:
+        type: string
+      tour_type:
+        $ref: '#/definitions/tour.TourType'
+    required:
+    - activity
+    - currency
+    - description_excursion
+    - description_route
+    - duration
+    - physical_rating
+    - price
+    - quantity
+    - season
+    - title
+    - tour_date
+    - tour_place
+    - tour_type
+    type: object
+  tour.TourEditor:
+    properties:
+      activity:
+        items:
+          type: string
+        type: array
+      email:
+        type: string
+      id:
+        type: integer
+      location:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      phone:
+        type: string
+      tour_date:
+        type: string
+    required:
+    - activity
+    - email
+    - location
+    - name
+    - phone
+    - tour_date
+    type: object
+  tour.TourType:
+    enum:
+    - Однодневный тур
+    - Многодневный тур
+    - Сити-тур
+    - Эксклюзивный тур
+    - Инфо-тур
+    - Авторский тур
+    type: string
+    x-enum-varnames:
+    - OneDayTour
+    - MultiDayTour
+    - CityTour
+    - ExclusiveTour
+    - InfoTour
+    - AuthorsTour
+host: localhost:8000
+info:
+  contact: {}
+  title: SilkRoad App API
+  version: "1.0"
+paths:
+  /contact_form:
+    post:
+      consumes:
+      - application/json
+      description: This method creates a new contact form and, if TourID is provided,
+        sends tour details
+      parameters:
+      - description: Contact form data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/forms.ContactForm'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Create a contact form
+      tags:
+      - forms
+  /countries:
+    get:
+      consumes:
+      - application/json
+      description: This method returns a list of all available countries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of countries
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Returns a list of countries
+      tags:
+      - countries
+  /help_with_tour_form:
+    post:
+      consumes:
+      - application/json
+      description: This method creates a new helpWithTour form
+      parameters:
+      - description: helpWithTour form data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/forms.HelpWithTourForm'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Create a help with tour form
+      tags:
+      - forms
+  /tour:
+    get:
+      consumes:
+      - application/json
+      description: This method returns a list of tours. You can filter by price range,
+        tour place, tour date, quantity, duration, and search by title. Pagination
+        is also supported via limit and offset.
+      parameters:
+      - description: 'Filter by price range, example: ''100-500'''
+        in: query
+        name: priceRange
+        type: string
+      - description: Filter by tour place
+        in: query
+        name: tour_place
+        type: string
+      - description: Filter by quantity of people
+        in: query
+        name: quantity
+        type: integer
+      - description: Filter by duration of the tour
+        in: query
+        name: duration
+        type: integer
+      - description: 'Filter by date of the tour, format: YYYY-MM-DDT00:00:00+00:00'
+        in: query
+        name: tour_date
+        type: string
+      - description: Search tours by title
+        in: query
+        name: search
+        type: string
+      - description: Limit the number of returned tours
+        in: query
+        name: limit
+        type: integer
+      - description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of tours
+          schema:
+            $ref: '#/definitions/http.getAllToursResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Returns a list of tours
+      tags:
+      - tour
+  /tour/{id}:
+    get:
+      consumes:
+      - application/json
+      description: This method returns the details of a specific tour by its ID
+      parameters:
+      - description: Tour ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tour details
+          schema:
+            $ref: '#/definitions/tour.Tour'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Returns tour by ID
+      tags:
+      - tour
+  /tour_editor:
+    post:
+      consumes:
+      - application/json
+      description: This method allows users to create a custom tour by submitting
+        their details and tour preferences. The tour data will also be sent to Telegram.
+      parameters:
+      - description: Custom tour data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/tour.TourEditor'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ID and creation status of the tour
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Create a custom tour
+      tags:
+      - tour
+swagger: "2.0"
