@@ -24,7 +24,8 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to DigitalOcean Docker Registry
-        run: echo "${{ secrets.ACCESS_TOKEN }}" | docker login registry.digitalocean.com -u "docean" --password-stdin
+        run: | 
+          echo "${{ secrets.ACCESS_TOKEN }}" | docker login registry.digitalocean.com -u "docean" --password-stdin
 
       - name: Build Docker image
         run: docker build -t registry.digitalocean.com/${{ env.REGISTRY_NAME }}/silkroad-app:latest .
