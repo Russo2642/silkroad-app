@@ -29,10 +29,10 @@ jobs:
         run: docker build -t registry.digitalocean.com/${{ REGISTRY_NAME }}/silkroad-app:latest .
 
       - name: Push Docker image to DigitalOcean Registry
-        run: docker push registry.digitalocean.com/${{ REGISTRY_NAME }}/silkroad-app:latest
+        run: docker push registry.digitalocean.com/$REGISTRY_NAME /silkroad-app:latest
 
     outputs:
-      image_name: registry.digitalocean.com/${{ REGISTRY_NAME }}/silkroad-app
+      image_name: registry.digitalocean.com/$REGISTRY_NAME/silkroad-app
       image_tag: latest
 
   deploy:
@@ -50,6 +50,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
             docker stop silkroad-app || true
             docker rm silkroad-app || true
-            docker pull registry.digitalocean.com/${{ REGISTRY_NAME }}/silkroad-app:latest
-            docker run -d --name silkroad-app -p 80:80 registry.digitalocean.com/${{ REGISTRY_NAME }}/silkroad-app:latest
+            docker pull registry.digitalocean.com/$REGISTRY_NAME/silkroad-app:latest
+            docker run -d --name silkroad-app -p 80:80 registry.digitalocean.com/$REGISTRY_NAME/silkroad-app:latest
           EOF
