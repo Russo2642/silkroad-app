@@ -7,9 +7,10 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 env:
-  REGISTRY_NAME: "silkroad-app"
+  REGISTRY_NAME: "silkroad-api"
 
 jobs:
   build:
