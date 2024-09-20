@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY_NAME: "silkroad-app"
+  REGISTRY_NAME: "silkroad-api"
 
 jobs:
   build:
@@ -27,13 +27,13 @@ jobs:
         run: echo "${{ secrets.ACCESS_TOKEN }}" | docker login registry.digitalocean.com -u "docean" --password-stdin
 
       - name: Build Docker image
-        run: docker build -t registry.digitalocean.com/$(echo $REGISTRY_NAME)/silkroad-app:latest .
+        run: docker build -t registry.digitalocean.com/${{ env.REGISTRY_NAME }}/silkroad-app:latest .
 
       - name: Push Docker image to DigitalOcean Registry
-        run: docker push registry.digitalocean.com/$(echo $REGISTRY_NAME)/silkroad-app:latest
+        run: docker push registry.digitalocean.com/${{ env.REGISTRY_NAME }}/silkroad-app:latest
 
     outputs:
-      image_name: registry.digitalocean.com/$(echo $REGISTRY_NAME)/silkroad-app
+      image_name: registry.digitalocean.com/${{ env.REGISTRY_NAME }}/silkroad-app
       image_tag: latest
 
   deploy:
@@ -51,6 +51,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
             docker stop silkroad-app || true
             docker rm silkroad-app || true
-            docker pull registry.digitalocean.com/$(echo $REGISTRY_NAME)/silkroad-app:latest
-            docker run -d --name silkroad-app -p 80:80 registry.digitalocean.com/$REGISTRY_NAME/silkroad-app:latest
+            docker pull registry.digitalocean.com/${{ env.REGISTRY_NAME }}/silkroad-app:latest
+            docker run -d --name silkroad-app -p 80:80 registry.digitalocean.com/${{ env.REGISTRY_NAME }}/silkroad-app:latest
           EOF
