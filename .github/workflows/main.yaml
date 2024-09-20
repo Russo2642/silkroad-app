@@ -49,8 +49,8 @@ jobs:
       - name: Deploy to DigitalOcean
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
-            docker stop silkroad-app || true
-            docker rm silkroad-app || true
-            docker pull registry.digitalocean.com/$(echo $REGISTRY_NAME)/silkroad-app:latest
-            docker run -d --name silkroad-app -p 80:80 registry.digitalocean.com/$REGISTRY_NAME/silkroad-app:latest
+            sudo docker stop silkroad-app || true
+            sudo docker rm silkroad-app || true
+            sudo docker pull registry.digitalocean.com/$(echo $REGISTRY_NAME)/silkroad-app:latest
+            sudo docker run -d --name silkroad-app -p 80:80 registry.digitalocean.com/$REGISTRY_NAME/silkroad-app:latest
           EOF
