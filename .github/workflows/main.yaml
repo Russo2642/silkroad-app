@@ -10,7 +10,6 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY_NAME: "silkroad-api"
   IMAGE_NAME: "registry.digitalocean.com/silkroad-api/silkroad-app"
   IMAGE_TAG: "latest"
 
@@ -51,9 +50,12 @@ jobs:
       - name: Deploy to DigitalOcean
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
-            set -e  # Остановить выполнение при любой ошибке
-            docker stop silkroad-app || true
-            docker rm silkroad-app || true
+            set -e
+            echo "${{ secrets.ACCESS_TOKEN }}" | docker login registry.digitalocean.com -u docean --password-stdin
+            if [ "$(docker ps -q -f name=silkroad-app)" ]; then
+                docker stop silkroad-app
+                docker rm silkroad-app
+            fi
             docker pull ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             docker run -d --name silkroad-app -p 80:80 \
               -e DB_HOST=${{ secrets.DB_HOST }} \
