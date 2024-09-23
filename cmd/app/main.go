@@ -54,7 +54,7 @@ func main() {
 		router := handlers.InitRoutes()
 
 		router.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{"http://178.128.123.250:80", "http://178.128.123.250:8000", "http://178.128.123.250:8080"},
+			AllowOrigins:     []string{"*"},
 			AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 			AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization", "Accept"},
 			AllowCredentials: true,
