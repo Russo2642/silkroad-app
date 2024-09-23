@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -50,7 +51,16 @@ func main() {
 
 	srv := new(server.Server)
 	go func() {
-		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+		router := handlers.InitRoutes()
+
+		router.Use(cors.New(cors.Config{
+			AllowOrigins:     []string{"http://178.128.123.250:80", "http://178.128.123.250:8000", "http://178.128.123.250:8080"},
+			AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+			AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization", "Accept"},
+			AllowCredentials: true,
+		}))
+
+		if err := srv.Run(viper.GetString("port"), router); err != nil {
 			logrus.Fatalf("error occured while running http server: %s", err.Error())
 		}
 	}()
