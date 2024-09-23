@@ -25,7 +25,7 @@ jobs:
 
       - name: Log in to DigitalOcean Docker Registry
         run: |
-          docker login registry.digitalocean.com -u docean -p ${{ secrets.ACCESS_TOKEN }}
+          echo "${{ secrets.ACCESS_TOKEN }}" | docker login registry.digitalocean.com -u docean --password-stdin
 
       - name: Проверка доступа к реестру
         run: curl -v https://registry.digitalocean.com/v2/
@@ -49,6 +49,10 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSHKEY }}
+
+      - name: Log in to DigitalOcean Docker Registry
+        run: | 
+          echo "${{ secrets.ACCESS_TOKEN }}" | docker login registry.digitalocean.com -u "docean" --password-stdin
 
       - name: Deploy to DigitalOcean
         run: |
