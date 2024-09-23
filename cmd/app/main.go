@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -30,10 +29,6 @@ func main() {
 
 	if err := config.InitConfig("configs", "config"); err != nil {
 		logrus.Fatalf("init config err: %s", err.Error())
-	}
-
-	if err := godotenv.Load(); err != nil {
-		logrus.Fatalf("load .env file err: %s", err.Error())
 	}
 
 	db, err := pg.NewPostgresDB(pg.Config{
@@ -71,5 +66,8 @@ func main() {
 	if err := srv.Shutdown(context.Background()); err != nil {
 		logrus.Errorf("Error occured while shutting down http server: %s", err.Error())
 	}
-	db.Close()
+
+	if db != nil {
+		db.Close()
+	}
 }

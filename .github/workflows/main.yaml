@@ -24,7 +24,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Log in to DigitalOcean Docker Registry
-        run: | 
+        run: |
           echo "${{ secrets.ACCESS_TOKEN }}" | docker login registry.digitalocean.com -u "docean" --password-stdin
 
       - name: Проверка доступа к реестру
@@ -56,5 +56,14 @@ jobs:
             docker stop silkroad-app || true
             docker rm silkroad-app || true
             docker pull registry.digitalocean.com/silkroad-api/silkroad-app:latest
-            docker run -d --name silkroad-app -p 80:80 registry.digitalocean.com/silkroad-api/silkroad-app:latest
+            docker run -d --name silkroad-app -p 80:80 \
+              -e DB_HOST=${{ secrets.DB_HOST }} \
+              -e DB_PORT=${{ secrets.DB_PORT }} \
+              -e DB_NAME=${{ secrets.DB_NAME }} \
+              -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e DB_SSLMODE=${{ secrets.DB_SSLMODE }} \
+              -e TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} \
+              -e TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }} \
+              registry.digitalocean.com/silkroad-api/silkroad-app:latest
           EOF
