@@ -50,12 +50,9 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSHKEY }}
 
-      - name: Log in to DigitalOcean Docker Registry
-        run: | 
-          echo "${{ secrets.ACCESS_TOKEN }}" | docker login registry.digitalocean.com -u "docean" --password-stdin
-
       - name: Deploy to DigitalOcean
         run: |
+          echo "${{ secrets.ACCESS_TOKEN }}" | docker login registry.digitalocean.com -u "docean" --password-stdin
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
             docker stop silkroad-app || true
             docker rm silkroad-app || true
