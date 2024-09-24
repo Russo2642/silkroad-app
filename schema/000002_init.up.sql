@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS tour
 (
     id                    serial       not null unique,
     tour_type             varchar(255) not null,
+    slug                  varchar(255),
     title                 varchar(255) not null,
     tour_place            varchar(255) not null,
     season                varchar(255) not null,
