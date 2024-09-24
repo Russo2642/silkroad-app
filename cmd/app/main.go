@@ -22,7 +22,7 @@ import (
 // @version 1.0
 // description API Server for SilkRoad Application
 
-// @host localhost:8000
+// @host 178.128.123.250:80
 // @basePath /api
 
 func main() {
