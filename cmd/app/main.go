@@ -21,10 +21,8 @@ import (
 // @title SilkRoad App API
 // @version 1.0
 // description API Server for SilkRoad Application
-
 // @host 178.128.123.250:80
 // @basePath /api
-
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 
