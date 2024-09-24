@@ -32,9 +32,7 @@ func (r *TourPostgres) Create(tour tour.Tour) (int, error) {
 		return 0, err
 	}
 
-	if tour.Slug == "" {
-		tour.Slug = slug.Make(tour.Title) // Генерация slug на основе названия тура
-	}
+	tour.Slug = slug.Make(tour.Title)
 
 	var id int
 	createTourQuery := fmt.Sprintf("INSERT INTO %s (tour_type, title, tour_place, season, quantity, duration, "+
@@ -208,7 +206,7 @@ func (r *TourPostgres) GetBySlug(tourSlug string) (tour.Tour, error) {
 	var calendarJSON []byte
 
 	query := fmt.Sprintf("SELECT id, tour_type, slug, title, tour_place, season, quantity, duration, physical_rating, "+
-		"description_excursion, description_route, price, currency, activity, tariff, tour_date, calendar FROM %s WHERE id = $1",
+		"description_excursion, description_route, price, currency, activity, tariff, tour_date, calendar FROM %s WHERE slug = $1",
 		tourTable)
 
 	row := r.db.QueryRow(query, tourSlug)
