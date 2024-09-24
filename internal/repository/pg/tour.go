@@ -152,7 +152,7 @@ func (r *TourPostgres) executeQuery(query string, args []interface{}) ([]tour.To
 		var t tour.Tour
 		var calendarJSON []byte
 
-		err := rows.Scan(&t.Id, &t.TourType, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration, &t.PhysicalRating,
+		err := rows.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration, &t.PhysicalRating,
 			&t.DescriptionExcursion, &t.DescriptionRoute, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate, &calendarJSON)
 		if err != nil {
 			return nil, err
