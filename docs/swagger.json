@@ -5,7 +5,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8000",
+    "host": "178.128.123.250:80",
     "basePath": "/api",
     "paths": {
         "/contact_form": {
