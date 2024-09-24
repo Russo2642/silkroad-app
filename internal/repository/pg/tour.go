@@ -37,9 +37,9 @@ func (r *TourPostgres) Create(tour tour.Tour) (int, error) {
 	}
 
 	var id int
-	createTourQuery := fmt.Sprintf("INSERT INTO %s (tour_type, slug, title, tour_place, season, quantity, duration, "+
+	createTourQuery := fmt.Sprintf("INSERT INTO %s (tour_type, title, tour_place, season, quantity, duration, "+
 		"physical_rating, description_excursion, description_route, price, currency, activity, tariff, tour_date, calendar)"+
-		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id",
+		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id",
 		tourTable)
 
 	row := tx.QueryRow(createTourQuery, tour.TourType, tour.Title, tour.TourPlace, tour.Season, tour.Quantity, tour.Duration,
