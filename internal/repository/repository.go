@@ -17,8 +17,10 @@ type HelpWithTourForm interface {
 
 type Tour interface {
 	Create(tour tour.Tour) (int, error)
-	GetAll(priceRange, tourPlace, tourDate, searchTitle string, quantity, duration int, limit, offset int) ([]tour.Tour, error)
+	GetAll(priceRange, tourPlace, tourDate, searchTitle string, quantity []int, duration, limit, offset int) ([]tour.Tour, int, error)
 	GetById(tourId int) (tour.Tour, error)
+	GetBySlug(tourSlug string) (tour.Tour, error)
+	GetMinMaxPrice() (int, int, error)
 }
 
 type TourEditor interface {

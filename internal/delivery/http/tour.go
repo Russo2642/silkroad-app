@@ -7,6 +7,18 @@ import (
 	"strconv"
 )
 
+// createTour creates a new tour
+// @Summary Creates a new tour
+// @Description This method creates a new tour with the given input data
+// @Tags tour
+// @Accept  json
+// @Produce  json
+// @Param input body tour.Tour true "Tour input"
+// @Success 201 {object} map[string]interface{} "Created"
+// @Failure 400 {object} errorResponse "Bad Request"
+// @Failure 422 {object} errorResponse "Invalid Tour Type"
+// @Failure 500 {object} errorResponse "Internal Server Error"
+// @Router /tour [post]
 func (h *Handler) createTour(c *gin.Context) {
 	var input tour.Tour
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -36,6 +48,7 @@ func (h *Handler) createTour(c *gin.Context) {
 
 type getAllToursResponse struct {
 	Tours []tour.Tour `json:"tours"`
+	Total int         `json:"total"`
 }
 
 // getAllTour Returns a list of tours with optional filters
@@ -59,9 +72,13 @@ func (h *Handler) getAllTour(c *gin.Context) {
 	priceRange := c.Query("priceRange")
 	tourPlace := c.Query("tour_place")
 
-	quantity, err := strconv.Atoi(c.Query("quantity"))
-	if err != nil {
-		quantity = 0
+	quantityStr := c.QueryArray("quantity")
+	var quantity []int
+	for _, q := range quantityStr {
+		qInt, err := strconv.Atoi(q)
+		if err == nil {
+			quantity = append(quantity, qInt)
+		}
 	}
 
 	duration, err := strconv.Atoi(c.Query("duration"))
@@ -82,13 +99,14 @@ func (h *Handler) getAllTour(c *gin.Context) {
 		offset = 0
 	}
 
-	tours, err := h.services.Tour.GetAll(priceRange, tourPlace, tourDate, searchTitle, quantity, duration, limit, offset)
+	tours, total, err := h.services.Tour.GetAll(priceRange, tourPlace, tourDate, searchTitle, quantity, duration, limit, offset)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	c.JSON(http.StatusOK, getAllToursResponse{
+		Total: total,
 		Tours: tours,
 	})
 }
@@ -103,7 +121,7 @@ func (h *Handler) getAllTour(c *gin.Context) {
 // @Success 200 {object} tour.Tour "Tour details"
 // @Failure 500 {object} errorResponse "Internal Server Error"
 // @Router /tour/{id} [get]
-func (h *Handler) getTour(c *gin.Context) {
+func (h *Handler) getTourById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -117,4 +135,27 @@ func (h *Handler) getTour(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, _tour)
+}
+
+func (h *Handler) getTourBySlug(c *gin.Context) {
+	_slug := c.Param("slug")
+	_tour, err := h.services.Tour.GetBySlug(_slug)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+
+	c.JSON(http.StatusOK, _tour)
+}
+
+func (h *Handler) getMinMaxPrice(c *gin.Context) {
+	minPrice, maxPrice, err := h.services.Tour.GetMinMaxPrice()
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"min_price": minPrice,
+		"max_price": maxPrice,
+	})
 }

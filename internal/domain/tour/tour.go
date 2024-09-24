@@ -25,6 +25,7 @@ const (
 type Tour struct {
 	Id                   int          `json:"id" db:"id"`
 	TourType             TourType     `json:"tour_type" db:"tour_type" binding:"required"`
+	Slug                 string       `json:"slug" db:"slug"`
 	Title                string       `json:"title" db:"title" binding:"required"`
 	TourPlace            string       `json:"tour_place" db:"tour_place" binding:"required"`
 	Season               string       `json:"season" db:"season" binding:"required"`

@@ -48,7 +48,9 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		{
 			tour.POST("/", h.createTour)
 			tour.GET("/", h.getAllTour)
-			tour.GET("/:id", h.getTour)
+			tour.GET("/:id", h.getTourById)
+			tour.GET("/:slug", h.getTourBySlug)
+			tour.GET("/prices", h.getMinMaxPrice)
 		}
 
 		tourEditor := api.Group("/tour_editor")
