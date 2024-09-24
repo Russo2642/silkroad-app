@@ -137,6 +137,16 @@ func (h *Handler) getTourById(c *gin.Context) {
 	c.JSON(http.StatusOK, _tour)
 }
 
+// getTourBySlug Returns tour by slug
+// @Summary Returns tour details by slug
+// @Description This method returns the details of a specific tour based on its slug
+// @Tags tour
+// @Accept  json
+// @Produce  json
+// @Param slug path string true "Tour Slug"
+// @Success 200 {object} tour.Tour "Tour details"
+// @Failure 500 {object} errorResponse "Internal Server Error"
+// @Router /tour/{slug} [get]
 func (h *Handler) getTourBySlug(c *gin.Context) {
 	_slug := c.Param("slug")
 	_tour, err := h.services.Tour.GetBySlug(_slug)
@@ -147,6 +157,15 @@ func (h *Handler) getTourBySlug(c *gin.Context) {
 	c.JSON(http.StatusOK, _tour)
 }
 
+// getMinMaxPrice Returns the minimum and maximum tour prices
+// @Summary Returns the minimum and maximum prices of all tours
+// @Description This method returns the minimum and maximum prices of all available tours
+// @Tags tour
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} map[string]interface{} "Min and Max tour prices"
+// @Failure 500 {object} errorResponse "Internal Server Error"
+// @Router /tour/prices [get]
 func (h *Handler) getMinMaxPrice(c *gin.Context) {
 	minPrice, maxPrice, err := h.services.Tour.GetMinMaxPrice()
 	if err != nil {

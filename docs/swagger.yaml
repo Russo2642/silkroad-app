@@ -45,6 +45,8 @@ definitions:
     type: object
   http.getAllToursResponse:
     properties:
+      total:
+        type: integer
       tours:
         items:
           $ref: '#/definitions/tour.Tour'
@@ -90,6 +92,8 @@ definitions:
       quantity:
         type: integer
       season:
+        type: string
+      slug:
         type: string
       tariff:
         type: string
@@ -319,6 +323,40 @@ paths:
       summary: Returns a list of tours
       tags:
       - tour
+    post:
+      consumes:
+      - application/json
+      description: This method creates a new tour with the given input data
+      parameters:
+      - description: Tour input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/tour.Tour'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "422":
+          description: Invalid Tour Type
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Creates a new tour
+      tags:
+      - tour
   /tour/{id}:
     get:
       consumes:
@@ -342,6 +380,53 @@ paths:
           schema:
             $ref: '#/definitions/http.errorResponse'
       summary: Returns tour by ID
+      tags:
+      - tour
+  /tour/{slug}:
+    get:
+      consumes:
+      - application/json
+      description: This method returns the details of a specific tour based on its
+        slug
+      parameters:
+      - description: Tour Slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tour details
+          schema:
+            $ref: '#/definitions/tour.Tour'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Returns tour details by slug
+      tags:
+      - tour
+  /tour/prices:
+    get:
+      consumes:
+      - application/json
+      description: This method returns the minimum and maximum prices of all available
+        tours
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Min and Max tour prices
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Returns the minimum and maximum prices of all tours
       tags:
       - tour
   /tour_editor:

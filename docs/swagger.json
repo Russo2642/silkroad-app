@@ -233,6 +233,87 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "This method creates a new tour with the given input data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tour"
+                ],
+                "summary": "Creates a new tour",
+                "parameters": [
+                    {
+                        "description": "Tour input",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/tour.Tour"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid Tour Type",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tour/prices": {
+            "get": {
+                "description": "This method returns the minimum and maximum prices of all available tours",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tour"
+                ],
+                "summary": "Returns the minimum and maximum prices of all tours",
+                "responses": {
+                    "200": {
+                        "description": "Min and Max tour prices",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    }
+                }
             }
         },
         "/tour/{id}": {
@@ -253,6 +334,44 @@
                         "type": "integer",
                         "description": "Tour ID",
                         "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tour details",
+                        "schema": {
+                            "$ref": "#/definitions/tour.Tour"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tour/{slug}": {
+            "get": {
+                "description": "This method returns the details of a specific tour based on its slug",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tour"
+                ],
+                "summary": "Returns tour details by slug",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tour Slug",
+                        "name": "slug",
                         "in": "path",
                         "required": true
                     }
@@ -388,6 +507,9 @@
         "http.getAllToursResponse": {
             "type": "object",
             "properties": {
+                "total": {
+                    "type": "integer"
+                },
                 "tours": {
                     "type": "array",
                     "items": {
@@ -470,6 +592,9 @@
                     "type": "integer"
                 },
                 "season": {
+                    "type": "string"
+                },
+                "slug": {
                     "type": "string"
                 },
                 "tariff": {
