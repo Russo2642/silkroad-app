@@ -707,7 +707,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "127.0.0.1:8000",
+	Host:             "178.128.123.250:80",
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "SilkRoad App API",
