@@ -45,8 +45,18 @@ definitions:
     type: object
   http.getAllToursResponse:
     properties:
-      total:
+      currentPage:
         type: integer
+      itemsPerPage:
+        type: integer
+      totalItems:
+        type: integer
+      totalPages:
+        type: integer
+      tourPlaces:
+        items:
+          type: string
+        type: array
       tours:
         items:
           $ref: '#/definitions/tour.Tour'
@@ -164,7 +174,7 @@ definitions:
     - ExclusiveTour
     - InfoTour
     - AuthorsTour
-host: 178.128.123.250:80
+host: 127.0.0.1:8000
 info:
   contact: {}
   title: SilkRoad App API
@@ -277,10 +287,6 @@ paths:
         tour place, tour date, quantity, duration, and search by title. Pagination
         is also supported via limit and offset.
       parameters:
-      - description: 'Filter by price range, example: ''100-500'''
-        in: query
-        name: priceRange
-        type: string
       - description: Filter by tour place
         in: query
         name: tour_place
@@ -288,6 +294,14 @@ paths:
       - description: Filter by quantity of people
         in: query
         name: quantity
+        type: integer
+      - description: 'Filter by price range (from min), example: 100'
+        in: query
+        name: priceMin
+        type: integer
+      - description: 'Filter by price range (to max), example: 500'
+        in: query
+        name: priceMax
         type: integer
       - description: Filter by duration of the tour
         in: query
@@ -313,7 +327,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: List of tours
+          description: List of tours / CurrentPage / ItemsPerPage / TotalItems / TotalPages
+            / TourPlaces
           schema:
             $ref: '#/definitions/http.getAllToursResponse'
         "500":

@@ -179,12 +179,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Filter by price range, example: '100-500'",
-                        "name": "priceRange",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
                         "description": "Filter by tour place",
                         "name": "tour_place",
                         "in": "query"
@@ -193,6 +187,18 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Filter by quantity of people",
                         "name": "quantity",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by price range (from min), example: 100",
+                        "name": "priceMin",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by price range (to max), example: 500",
+                        "name": "priceMax",
                         "in": "query"
                     },
                     {
@@ -228,7 +234,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of tours",
+                        "description": "List of tours / CurrentPage / ItemsPerPage / TotalItems / TotalPages / TourPlaces",
                         "schema": {
                             "$ref": "#/definitions/http.getAllToursResponse"
                         }
@@ -514,8 +520,23 @@ const docTemplate = `{
         "http.getAllToursResponse": {
             "type": "object",
             "properties": {
-                "total": {
+                "currentPage": {
                     "type": "integer"
+                },
+                "itemsPerPage": {
+                    "type": "integer"
+                },
+                "totalItems": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                },
+                "tourPlaces": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "tours": {
                     "type": "array",
@@ -686,7 +707,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "178.128.123.250:80",
+	Host:             "127.0.0.1:8000",
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "SilkRoad App API",

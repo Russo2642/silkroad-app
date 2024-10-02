@@ -47,8 +47,12 @@ func (h *Handler) createTour(c *gin.Context) {
 }
 
 type getAllToursResponse struct {
-	Tours []tour.Tour `json:"tours"`
-	Total int         `json:"total"`
+	Tours        []tour.Tour `json:"tours"`
+	CurrentPage  int         `json:"currentPage"`
+	ItemsPerPage int         `json:"itemsPerPage"`
+	TotalItems   int         `json:"totalItems"`
+	TotalPages   int         `json:"totalPages"`
+	TourPlaces   []string    `json:"tourPlaces"`
 }
 
 // getAllTour Returns a list of tours with optional filters
@@ -57,19 +61,19 @@ type getAllToursResponse struct {
 // @Tags tour
 // @Accept  json
 // @Produce  json
-// @Param priceRange query string false "Filter by price range, example: '100-500'"
 // @Param tour_place query string false "Filter by tour place"
 // @Param quantity query int false "Filter by quantity of people"
+// @Param priceMin query int false "Filter by price range (from min), example: 100"
+// @Param priceMax query int false "Filter by price range (to max), example: 500"
 // @Param duration query int false "Filter by duration of the tour"
 // @Param tour_date query string false "Filter by date of the tour, format: YYYY-MM-DDT00:00:00+00:00"
 // @Param search query string false "Search tours by title"
 // @Param limit query int false "Limit the number of returned tours"
 // @Param offset query int false "Offset for pagination"
-// @Success 200 {object} getAllToursResponse "List of tours"
+// @Success 200 {object} getAllToursResponse "List of tours / CurrentPage / ItemsPerPage / TotalItems / TotalPages / TourPlaces"
 // @Failure 500 {object} errorResponse "Internal Server Error"
 // @Router /tour [get]
 func (h *Handler) getAllTour(c *gin.Context) {
-	priceRange := c.Query("priceRange")
 	tourPlace := c.Query("tour_place")
 
 	quantityStr := c.QueryArray("quantity")
@@ -79,6 +83,16 @@ func (h *Handler) getAllTour(c *gin.Context) {
 		if err == nil {
 			quantity = append(quantity, qInt)
 		}
+	}
+
+	priceMin, err := strconv.Atoi(c.Query("priceMin"))
+	if err == nil {
+		priceMin = 0
+	}
+
+	priceMax, err := strconv.Atoi(c.Query("priceMax"))
+	if err == nil {
+		priceMax = 0
 	}
 
 	duration, err := strconv.Atoi(c.Query("duration"))
@@ -99,15 +113,19 @@ func (h *Handler) getAllTour(c *gin.Context) {
 		offset = 0
 	}
 
-	tours, total, err := h.services.Tour.GetAll(priceRange, tourPlace, tourDate, searchTitle, quantity, duration, limit, offset)
+	tours, currentPage, limit, totalItems, totalPages, tourPlaces, err := h.services.Tour.GetAll(tourPlace, tourDate, searchTitle, quantity, priceMin, priceMax, duration, limit, offset)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	c.JSON(http.StatusOK, getAllToursResponse{
-		Total: total,
-		Tours: tours,
+		Tours:        tours,
+		CurrentPage:  currentPage,
+		ItemsPerPage: limit,
+		TotalItems:   totalItems,
+		TotalPages:   totalPages,
+		TourPlaces:   tourPlaces,
 	})
 }
 

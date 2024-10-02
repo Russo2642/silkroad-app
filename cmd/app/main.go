@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-contrib/cors"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -22,7 +23,7 @@ import (
 // @version 1.0
 // description API Server for SilkRoad Application
 
-// @host 178.128.123.250:80
+// @host 127.0.0.1:8000
 // @basePath /api
 
 func main() {
@@ -30,6 +31,10 @@ func main() {
 
 	if err := config.InitConfig("configs", "config"); err != nil {
 		logrus.Fatalf("init config err: %s", err.Error())
+	}
+
+	if err := godotenv.Load(); err != nil {
+		logrus.Fatalf("load .env file err: %s", err.Error())
 	}
 
 	db, err := pg.NewPostgresDB(pg.Config{

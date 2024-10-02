@@ -8,7 +8,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	"silkroad/m/internal/domain/tour"
-	"strconv"
 	"strings"
 )
 
@@ -52,25 +51,48 @@ func (r *TourPostgres) Create(tour tour.Tour) (int, error) {
 	return id, tx.Commit()
 }
 
-func (r *TourPostgres) GetAll(priceRange, tourPlace, tourDate, searchTitle string, quantity []int, duration, limit, offset int) ([]tour.Tour, int, error) {
-	query, args := r.buildQuery(priceRange, tourPlace, tourDate, searchTitle, quantity, duration, limit, offset)
+func (r *TourPostgres) GetAll(tourPlace, tourDate, searchTitle string, quantity []int, priceMin, priceMax, duration, limit, offset int) ([]tour.Tour, int, int, int, int, []string, error) {
+	query, args := r.buildQuery(tourPlace, tourDate, searchTitle, quantity, priceMin, priceMax, duration, limit, offset)
 
 	totalQuery := "SELECT COUNT(*) FROM (" + query + ") AS count_query"
-	var total int
-	err := r.db.QueryRow(totalQuery, args...).Scan(&total)
+	var totalItems int
+	err := r.db.QueryRow(totalQuery, args...).Scan(&totalItems)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, 0, 0, 0, nil, err
 	}
 
 	tours, err := r.executeQuery(query, args)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, 0, 0, 0, nil, err
 	}
 
-	return tours, total, nil
+	var tourPlaces []string
+	placesQuery := fmt.Sprintf("SELECT DISTINCT tour_place FROM %s ORDER BY tour_place", tourTable)
+	rows, err := r.db.Query(placesQuery)
+	if err != nil {
+		return nil, 0, 0, 0, 0, nil, err
+	}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			panic(err)
+		}
+	}()
+
+	for rows.Next() {
+		var place string
+		if err := rows.Scan(&place); err != nil {
+			return nil, 0, 0, 0, 0, nil, err
+		}
+		tourPlaces = append(tourPlaces, place)
+	}
+
+	currentPage := (offset / limit) + 1
+	totalPages := (totalItems + limit - 1) / limit
+
+	return tours, currentPage, limit, totalItems, totalPages, tourPlaces, nil
 }
 
-func (r *TourPostgres) buildQuery(priceRange, tourPlace, tourDate, searchTitle string, quantity []int, duration, limit, offset int) (string, []interface{}) {
+func (r *TourPostgres) buildQuery(tourPlace, tourDate, searchTitle string, quantity []int, priceMin, priceMax, duration, limit, offset int) (string, []interface{}) {
 	var filters []string
 	var args []interface{}
 	argCount := 1
@@ -79,17 +101,18 @@ func (r *TourPostgres) buildQuery(priceRange, tourPlace, tourDate, searchTitle s
 		"physical_rating, description_excursion, description_route, price, currency, activity, tariff, tour_date, calendar "+
 		"FROM %s", tourTable)
 
-	if priceRange != "" {
-		priceParts := strings.Split(priceRange, "-")
-		if len(priceParts) == 2 {
-			minPrice, err1 := strconv.Atoi(priceParts[0])
-			maxPrice, err2 := strconv.Atoi(priceParts[1])
-			if err1 == nil && err2 == nil {
-				filters = append(filters, fmt.Sprintf("price BETWEEN $%d AND $%d", argCount, argCount+1))
-				args = append(args, minPrice, maxPrice)
-				argCount += 2
-			}
-		}
+	if priceMin > 0 && priceMax > 0 {
+		filters = append(filters, fmt.Sprintf("price BETWEEN $%d AND $%d ", argCount, argCount+1))
+		args = append(args, priceMin, priceMax)
+		argCount++
+	} else if priceMin > 0 {
+		filters = append(filters, fmt.Sprintf("price >= $%d", argCount))
+		args = append(args, priceMin)
+		argCount++
+	} else if priceMax > 0 {
+		filters = append(filters, fmt.Sprintf("price <= $%d", argCount))
+		args = append(args, priceMax)
+		argCount++
 	}
 
 	if len(quantity) > 0 {
@@ -144,7 +167,11 @@ func (r *TourPostgres) executeQuery(query string, args []interface{}) ([]tour.To
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			panic(err)
+		}
+	}()
 
 	for rows.Next() {
 		var t tour.Tour
