@@ -68,6 +68,19 @@ definitions:
         $ref: '#/definitions/tour.TimeSlot'
       type: object
     type: object
+  tour.DescriptionRoute:
+    properties:
+      default:
+        items:
+          type: string
+        type: array
+      next:
+        items:
+          type: string
+        type: array
+    required:
+    - default
+    type: object
   tour.TimeSlot:
     properties:
       from:
@@ -88,7 +101,7 @@ definitions:
       description_excursion:
         type: string
       description_route:
-        type: string
+        $ref: '#/definitions/tour.DescriptionRoute'
       duration:
         type: integer
       id:

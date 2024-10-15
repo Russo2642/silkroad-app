@@ -555,6 +555,26 @@ const docTemplate = `{
                 }
             }
         },
+        "tour.DescriptionRoute": {
+            "type": "object",
+            "required": [
+                "default"
+            ],
+            "properties": {
+                "default": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "next": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "tour.TimeSlot": {
             "type": "object",
             "properties": {
@@ -600,7 +620,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "description_route": {
-                    "type": "string"
+                    "$ref": "#/definitions/tour.DescriptionRoute"
                 },
                 "duration": {
                     "type": "integer"
