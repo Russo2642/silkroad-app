@@ -31,6 +31,12 @@ func (r *TourPostgres) Create(tour tour.Tour) (int, error) {
 		return 0, err
 	}
 
+	descriptionRouteJSON, err := json.Marshal(tour.DescriptionRoute)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
 	tour.Slug = slug.Make(tour.Title)
 
 	var id int
@@ -40,7 +46,7 @@ func (r *TourPostgres) Create(tour tour.Tour) (int, error) {
 		tourTable)
 
 	row := tx.QueryRow(createTourQuery, tour.TourType, tour.Slug, tour.Title, tour.TourPlace, tour.Season, tour.Quantity, tour.Duration,
-		tour.PhysicalRating, tour.DescriptionExcursion, tour.DescriptionRoute, tour.Price, tour.Currency,
+		tour.PhysicalRating, tour.DescriptionExcursion, descriptionRouteJSON, tour.Price, tour.Currency,
 		pq.Array(tour.Activity), tour.Tariff, tour.TourDate, calendarJSON)
 
 	if err := row.Scan(&id); err != nil {
@@ -176,11 +182,19 @@ func (r *TourPostgres) executeQuery(query string, args []interface{}) ([]tour.To
 	for rows.Next() {
 		var t tour.Tour
 		var calendarJSON []byte
+		var descriptionRouteJSON []byte
 
 		err := rows.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration, &t.PhysicalRating,
-			&t.DescriptionExcursion, &t.DescriptionRoute, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate, &calendarJSON)
+			&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate, &calendarJSON)
 		if err != nil {
 			return nil, err
+		}
+
+		if len(descriptionRouteJSON) > 0 {
+			err = json.Unmarshal(descriptionRouteJSON, &t.DescriptionRoute)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		if len(calendarJSON) > 0 {
