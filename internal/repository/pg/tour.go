@@ -25,12 +25,6 @@ func (r *TourPostgres) Create(tour tour.Tour) (int, error) {
 		return 0, err
 	}
 
-	calendarJSON, err := json.Marshal(tour.Calendar)
-	if err != nil {
-		tx.Rollback()
-		return 0, err
-	}
-
 	descriptionRouteJSON, err := json.Marshal(tour.DescriptionRoute)
 	if err != nil {
 		tx.Rollback()
@@ -41,13 +35,13 @@ func (r *TourPostgres) Create(tour tour.Tour) (int, error) {
 
 	var id int
 	createTourQuery := fmt.Sprintf("INSERT INTO %s (tour_type, slug, title, tour_place, season, quantity, duration, "+
-		"physical_rating, description_excursion, description_route, price, currency, activity, tariff, tour_date, calendar)"+
-		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id",
+		"physical_rating, description_excursion, description_route, price, currency, activity, tariff, tour_date)"+
+		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id",
 		tourTable)
 
 	row := tx.QueryRow(createTourQuery, tour.TourType, tour.Slug, tour.Title, tour.TourPlace, tour.Season, tour.Quantity, tour.Duration,
 		tour.PhysicalRating, tour.DescriptionExcursion, descriptionRouteJSON, tour.Price, tour.Currency,
-		pq.Array(tour.Activity), tour.Tariff, tour.TourDate, calendarJSON)
+		pq.Array(tour.Activity), tour.Tariff, tour.TourDate)
 
 	if err := row.Scan(&id); err != nil {
 		tx.Rollback()
@@ -104,7 +98,7 @@ func (r *TourPostgres) buildQuery(tourPlace, tourDate, searchTitle string, quant
 	argCount := 1
 
 	query := fmt.Sprintf("SELECT id, tour_type, slug, title, tour_place, season, quantity, duration, "+
-		"physical_rating, description_excursion, description_route, price, currency, activity, tariff, tour_date, calendar "+
+		"physical_rating, description_excursion, description_route, price, currency, activity, tariff, tour_date"+
 		"FROM %s", tourTable)
 
 	if priceMin > 0 && priceMax > 0 {
@@ -181,24 +175,16 @@ func (r *TourPostgres) executeQuery(query string, args []interface{}) ([]tour.To
 
 	for rows.Next() {
 		var t tour.Tour
-		var calendarJSON []byte
 		var descriptionRouteJSON []byte
 
 		err := rows.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration, &t.PhysicalRating,
-			&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate, &calendarJSON)
+			&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate)
 		if err != nil {
 			return nil, err
 		}
 
 		if len(descriptionRouteJSON) > 0 {
 			err = json.Unmarshal(descriptionRouteJSON, &t.DescriptionRoute)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		if len(calendarJSON) > 0 {
-			err = json.Unmarshal(calendarJSON, &t.Calendar)
 			if err != nil {
 				return nil, err
 			}
@@ -216,16 +202,15 @@ func (r *TourPostgres) executeQuery(query string, args []interface{}) ([]tour.To
 
 func (r *TourPostgres) GetById(tourId int) (tour.Tour, error) {
 	var t tour.Tour
-	var calendarJSON []byte
 	var descriptionRouteJSON []byte
 
 	query := fmt.Sprintf("SELECT id, tour_type, slug, title, tour_place, season, quantity, duration, physical_rating, "+
-		"description_excursion, description_route, price, currency, activity, tariff, tour_date, calendar FROM %s WHERE id = $1",
+		"description_excursion, description_route, price, currency, activity, tariff, tour_date FROM %s WHERE id = $1",
 		tourTable)
 
 	row := r.db.QueryRow(query, tourId)
 	err := row.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration, &t.PhysicalRating,
-		&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate, &calendarJSON)
+		&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return t, nil
@@ -235,13 +220,6 @@ func (r *TourPostgres) GetById(tourId int) (tour.Tour, error) {
 
 	if len(descriptionRouteJSON) > 0 {
 		err = json.Unmarshal(descriptionRouteJSON, &t.DescriptionRoute)
-		if err != nil {
-			return t, err
-		}
-	}
-
-	if len(calendarJSON) > 0 {
-		err = json.Unmarshal(calendarJSON, &t.Calendar)
 		if err != nil {
 			return t, err
 		}
@@ -252,16 +230,15 @@ func (r *TourPostgres) GetById(tourId int) (tour.Tour, error) {
 
 func (r *TourPostgres) GetBySlug(tourSlug string) (tour.Tour, error) {
 	var t tour.Tour
-	var calendarJSON []byte
 	var descriptionRouteJSON []byte
 
 	query := fmt.Sprintf("SELECT id, tour_type, slug, title, tour_place, season, quantity, duration, physical_rating, "+
-		"description_excursion, description_route, price, currency, activity, tariff, tour_date, calendar FROM %s WHERE slug = $1",
+		"description_excursion, description_route, price, currency, activity, tariff, tour_date FROM %s WHERE slug = $1",
 		tourTable)
 
 	row := r.db.QueryRow(query, tourSlug)
 	err := row.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration, &t.PhysicalRating,
-		&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate, &calendarJSON)
+		&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return t, nil
@@ -271,13 +248,6 @@ func (r *TourPostgres) GetBySlug(tourSlug string) (tour.Tour, error) {
 
 	if len(descriptionRouteJSON) > 0 {
 		err = json.Unmarshal(descriptionRouteJSON, &t.DescriptionRoute)
-		if err != nil {
-			return t, err
-		}
-	}
-
-	if len(calendarJSON) > 0 {
-		err = json.Unmarshal(calendarJSON, &t.Calendar)
 		if err != nil {
 			return t, err
 		}
