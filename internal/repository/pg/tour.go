@@ -99,7 +99,7 @@ func (r *TourPostgres) buildQuery(tourPlace, tourDate, searchTitle string, quant
 
 	query := fmt.Sprintf("SELECT id, tour_type, slug, title, tour_place, season, quantity, duration, "+
 		"physical_rating, description_excursion, description_route, price, currency, activity, tariff, tour_date"+
-		"FROM %s", tourTable)
+		" FROM %s", tourTable)
 
 	if priceMin > 0 && priceMax > 0 {
 		filters = append(filters, fmt.Sprintf("price BETWEEN $%d AND $%d ", argCount, argCount+1))
