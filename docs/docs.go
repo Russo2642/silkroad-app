@@ -329,9 +329,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/tour/{id}": {
+        "/tour/title/{slug}": {
             "get": {
-                "description": "This method returns the details of a specific tour by its ID",
+                "description": "This method returns the details of a specific tour based on its slug",
                 "consumes": [
                     "application/json"
                 ],
@@ -341,12 +341,12 @@ const docTemplate = `{
                 "tags": [
                     "tour"
                 ],
-                "summary": "Returns tour by ID",
+                "summary": "Returns tour details by slug",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Tour ID",
-                        "name": "id",
+                        "type": "string",
+                        "description": "Tour Slug",
+                        "name": "slug",
                         "in": "path",
                         "required": true
                     }
@@ -367,9 +367,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/tour/{slug}": {
+        "/tour/{id}": {
             "get": {
-                "description": "This method returns the details of a specific tour based on its slug",
+                "description": "This method returns the details of a specific tour by its ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -379,12 +379,12 @@ const docTemplate = `{
                 "tags": [
                     "tour"
                 ],
-                "summary": "Returns tour details by slug",
+                "summary": "Returns tour by ID",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Tour Slug",
-                        "name": "slug",
+                        "type": "integer",
+                        "description": "Tour ID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -546,15 +546,6 @@ const docTemplate = `{
                 }
             }
         },
-        "tour.CalendarType": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "object",
-                "additionalProperties": {
-                    "$ref": "#/definitions/tour.TimeSlot"
-                }
-            }
-        },
         "tour.DescriptionRoute": {
             "type": "object",
             "required": [
@@ -572,17 +563,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                }
-            }
-        },
-        "tour.TimeSlot": {
-            "type": "object",
-            "properties": {
-                "from": {
-                    "type": "string"
-                },
-                "to": {
-                    "type": "string"
                 }
             }
         },
@@ -609,9 +589,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "calendar": {
-                    "$ref": "#/definitions/tour.CalendarType"
                 },
                 "currency": {
                     "type": "string"

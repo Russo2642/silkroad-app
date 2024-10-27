@@ -62,12 +62,6 @@ definitions:
           $ref: '#/definitions/tour.Tour'
         type: array
     type: object
-  tour.CalendarType:
-    additionalProperties:
-      additionalProperties:
-        $ref: '#/definitions/tour.TimeSlot'
-      type: object
-    type: object
   tour.DescriptionRoute:
     properties:
       default:
@@ -81,21 +75,12 @@ definitions:
     required:
     - default
     type: object
-  tour.TimeSlot:
-    properties:
-      from:
-        type: string
-      to:
-        type: string
-    type: object
   tour.Tour:
     properties:
       activity:
         items:
           type: string
         type: array
-      calendar:
-        $ref: '#/definitions/tour.CalendarType'
       currency:
         type: string
       description_excursion:
@@ -410,7 +395,28 @@ paths:
       summary: Returns tour by ID
       tags:
       - tour
-  /tour/{slug}:
+  /tour/prices:
+    get:
+      consumes:
+      - application/json
+      description: This method returns the minimum and maximum prices of all available
+        tours
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Min and Max tour prices
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Returns the minimum and maximum prices of all tours
+      tags:
+      - tour
+  /tour/title/{slug}:
     get:
       consumes:
       - application/json
@@ -434,27 +440,6 @@ paths:
           schema:
             $ref: '#/definitions/http.errorResponse'
       summary: Returns tour details by slug
-      tags:
-      - tour
-  /tour/prices:
-    get:
-      consumes:
-      - application/json
-      description: This method returns the minimum and maximum prices of all available
-        tours
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Min and Max tour prices
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/http.errorResponse'
-      summary: Returns the minimum and maximum prices of all tours
       tags:
       - tour
   /tour_editor:
