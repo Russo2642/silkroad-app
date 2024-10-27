@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"silkroad/m/internal/domain/tour"
 	"silkroad/m/internal/repository"
 )
@@ -22,11 +23,11 @@ func (s *TourService) GetAll(tourPlace, tourDate, searchTitle string, quantity [
 }
 
 func (s *TourService) GetById(tourId int) (tour.Tour, error) {
-	return s.repo.GetById(tourId)
+	return s.repo.GetTourByField("id", fmt.Sprintf("%d", tourId))
 }
 
 func (s *TourService) GetBySlug(tourSlug string) (tour.Tour, error) {
-	return s.repo.GetBySlug(tourSlug)
+	return s.repo.GetTourByField("slug", tourSlug)
 }
 
 func (s *TourService) GetMinMaxPrice() (int, int, error) {

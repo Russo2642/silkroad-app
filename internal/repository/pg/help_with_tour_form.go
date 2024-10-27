@@ -26,7 +26,10 @@ func (r *HelpWithTourFormPostgres) Create(helpWithTourForm forms.HelpWithTourFor
 		helpWithTourFormTable)
 	row := tx.QueryRow(createContactFormQuery, helpWithTourForm.Name, helpWithTourForm.Phone, helpWithTourForm.Place, helpWithTourForm.WhenDate)
 	if err := row.Scan(&id); err != nil {
-		tx.Rollback()
+		err := tx.Rollback()
+		if err != nil {
+			return 0, err
+		}
 		return 0, err
 	}
 

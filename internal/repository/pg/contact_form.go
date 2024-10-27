@@ -27,7 +27,10 @@ func (r *ContactFormPostgres) Create(contactForm forms.ContactForm) (int, error)
 	row := tx.QueryRow(createContactFormQuery, contactForm.Name, contactForm.Phone, contactForm.Email,
 		contactForm.Description, contactForm.TourID)
 	if err := row.Scan(&id); err != nil {
-		tx.Rollback()
+		err := tx.Rollback()
+		if err != nil {
+			return 0, err
+		}
 		return 0, err
 	}
 

@@ -28,7 +28,10 @@ func (r *TourEditorPostgres) Create(tourEditor tour.TourEditor) (int, error) {
 	row := tx.QueryRow(createTourEditorQuery, tourEditor.Name, tourEditor.Phone, tourEditor.Email, tourEditor.TourDate,
 		pq.Array(tourEditor.Activity), pq.Array(tourEditor.Location))
 	if err := row.Scan(&id); err != nil {
-		tx.Rollback()
+		err := tx.Rollback()
+		if err != nil {
+			return 0, err
+		}
 		return 0, err
 	}
 
