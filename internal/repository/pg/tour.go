@@ -256,62 +256,6 @@ func (r *TourPostgres) GetTourByField(field, value string) (tour.Tour, error) {
 	return t, nil
 }
 
-//func (r *TourPostgres) GetById(tourId int) (tour.Tour, error) {
-//	var t tour.Tour
-//	var descriptionRouteJSON []byte
-//
-//	query := fmt.Sprintf("SELECT id, tour_type, slug, title, tour_place, season, quantity, duration, physical_rating, "+
-//		"description_excursion, description_route, price, currency, activity, tariff, tour_date FROM %s WHERE id = $1",
-//		tourTable)
-//
-//	row := r.db.QueryRow(query, tourId)
-//	err := row.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration, &t.PhysicalRating,
-//		&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate)
-//	if err != nil {
-//		if errors.Is(err, sql.ErrNoRows) {
-//			return t, nil
-//		}
-//		return t, err
-//	}
-//
-//	if len(descriptionRouteJSON) > 0 {
-//		err = json.Unmarshal(descriptionRouteJSON, &t.DescriptionRoute)
-//		if err != nil {
-//			return t, err
-//		}
-//	}
-//
-//	return t, nil
-//}
-//
-//func (r *TourPostgres) GetBySlug(tourSlug string) (tour.Tour, error) {
-//	var t tour.Tour
-//	var descriptionRouteJSON []byte
-//
-//	query := fmt.Sprintf("SELECT id, tour_type, slug, title, tour_place, season, quantity, duration, physical_rating, "+
-//		"description_excursion, description_route, price, currency, activity, tariff, tour_date FROM %s WHERE slug = $1",
-//		tourTable)
-//
-//	row := r.db.QueryRow(query, tourSlug)
-//	err := row.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration, &t.PhysicalRating,
-//		&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate)
-//	if err != nil {
-//		if errors.Is(err, sql.ErrNoRows) {
-//			return t, nil
-//		}
-//		return t, err
-//	}
-//
-//	if len(descriptionRouteJSON) > 0 {
-//		err = json.Unmarshal(descriptionRouteJSON, &t.DescriptionRoute)
-//		if err != nil {
-//			return t, err
-//		}
-//	}
-//
-//	return t, nil
-//}
-
 func (r *TourPostgres) GetMinMaxPrice() (int, int, error) {
 	var minPrice, maxPrice int
 

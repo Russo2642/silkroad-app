@@ -164,7 +164,7 @@ func (h *Handler) getTourById(c *gin.Context) {
 // @Param slug path string true "Tour Slug"
 // @Success 200 {object} tour.Tour "Tour details"
 // @Failure 500 {object} errorResponse "Internal Server Error"
-// @Router /tour/{slug} [get]
+// @Router /tour/title/{slug} [get]
 func (h *Handler) getTourBySlug(c *gin.Context) {
 	_slug := c.Param("slug")
 	_tour, err := h.services.Tour.GetBySlug(_slug)
