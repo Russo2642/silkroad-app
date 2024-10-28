@@ -43,7 +43,7 @@ func (r *TourPostgres) AddPhotos(tourID int, files []*multipart.FileHeader) erro
 		}
 	}
 
-	updatePhotosQuery := fmt.Sprintf("UPDATE %s SET photos = array_cat(photos, $1) WHERE id = $2", tourTable)
+	updatePhotosQuery := fmt.Sprintf("UPDATE %s SET photos = array_cat(COALESCE(photos, '{}'), $1) WHERE id = $2", tourTable)
 	_, err = tx.Exec(updatePhotosQuery, pq.Array(photoUrls), tourID)
 	if err != nil {
 		_ = tx.Rollback()
