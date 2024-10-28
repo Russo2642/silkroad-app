@@ -68,7 +68,7 @@ func (r *TourPostgres) Create(tour tour.Tour) (int, error) {
 
 	row := tx.QueryRow(createTourQuery, tour.TourType, tour.Slug, tour.Title, tour.TourPlace, tour.Season, tour.Quantity, tour.Duration,
 		tour.PhysicalRating, tour.DescriptionExcursion, descriptionRouteJSON, tour.Price, tour.Currency,
-		pq.Array(tour.Activity), tour.Tariff, tour.TourDate)
+		pq.Array(tour.Activity), tour.Tariff, tour.TourDate, pq.Array(tour.Photos))
 
 	if err := row.Scan(&id); err != nil {
 		err := tx.Rollback()
@@ -208,7 +208,7 @@ func (r *TourPostgres) executeQuery(query string, args []interface{}) ([]tour.To
 		var descriptionRouteJSON []byte
 
 		err := rows.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration, &t.PhysicalRating,
-			&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate, &t.Photos)
+			&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate, pq.Array(&t.Photos))
 		if err != nil {
 			return nil, err
 		}
@@ -240,7 +240,7 @@ func (r *TourPostgres) GetTourByField(field, value string) (tour.Tour, error) {
 
 	row := r.db.QueryRow(query, value)
 	err := row.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration, &t.PhysicalRating,
-		&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate, &t.Photos)
+		&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate, pq.Array(&t.Photos))
 	if errors.Is(err, sql.ErrNoRows) {
 		return t, nil
 	} else if err != nil {
