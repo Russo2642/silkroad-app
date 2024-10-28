@@ -10,7 +10,7 @@ import (
 // createTour creates a new tour
 // @Summary Creates a new tour
 // @Description This method creates a new tour with the given input data
-// @Tags tour
+// @Tags tours
 // @Accept  json
 // @Produce  json
 // @Param input body tour.Tour true "Tour input"
@@ -18,7 +18,7 @@ import (
 // @Failure 400 {object} errorResponse "Bad Request"
 // @Failure 422 {object} errorResponse "Invalid Tour Type"
 // @Failure 500 {object} errorResponse "Internal Server Error"
-// @Router /tour [post]
+// @Router /tours [post]
 func (h *Handler) createTour(c *gin.Context) {
 	var input tour.Tour
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -58,7 +58,7 @@ type getAllToursResponse struct {
 // getAllTour Returns a list of tours with optional filters
 // @Summary Returns a list of tours
 // @Description This method returns a list of tours. You can filter by price range, tour place, tour date, quantity, duration, and search by title. Pagination is also supported via limit and offset.
-// @Tags tour
+// @Tags tours
 // @Accept  json
 // @Produce  json
 // @Param tour_place query string false "Filter by tour place"
@@ -72,7 +72,7 @@ type getAllToursResponse struct {
 // @Param offset query int false "Offset for pagination"
 // @Success 200 {object} getAllToursResponse "List of tours / CurrentPage / ItemsPerPage / TotalItems / TotalPages / TourPlaces"
 // @Failure 500 {object} errorResponse "Internal Server Error"
-// @Router /tour [get]
+// @Router /tours [get]
 func (h *Handler) getAllTour(c *gin.Context) {
 	tourPlace := c.Query("tour_place")
 
@@ -132,13 +132,13 @@ func (h *Handler) getAllTour(c *gin.Context) {
 // getTour Returns tour by ID
 // @Summary Returns tour by ID
 // @Description This method returns the details of a specific tour by its ID
-// @Tags tour
+// @Tags tours
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Tour ID"
 // @Success 200 {object} tour.Tour "Tour details"
 // @Failure 500 {object} errorResponse "Internal Server Error"
-// @Router /tour/{id} [get]
+// @Router /tours/{id} [get]
 func (h *Handler) getTourById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -158,13 +158,13 @@ func (h *Handler) getTourById(c *gin.Context) {
 // getTourBySlug Returns tour by slug
 // @Summary Returns tour details by slug
 // @Description This method returns the details of a specific tour based on its slug
-// @Tags tour
+// @Tags tours
 // @Accept  json
 // @Produce  json
 // @Param slug path string true "Tour Slug"
 // @Success 200 {object} tour.Tour "Tour details"
 // @Failure 500 {object} errorResponse "Internal Server Error"
-// @Router /tour/title/{slug} [get]
+// @Router /tours/title/{slug} [get]
 func (h *Handler) getTourBySlug(c *gin.Context) {
 	_slug := c.Param("slug")
 	_tour, err := h.services.Tour.GetBySlug(_slug)
@@ -178,12 +178,12 @@ func (h *Handler) getTourBySlug(c *gin.Context) {
 // getMinMaxPrice Returns the minimum and maximum tour prices
 // @Summary Returns the minimum and maximum prices of all tours
 // @Description This method returns the minimum and maximum prices of all available tours
-// @Tags tour
+// @Tags tours
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} map[string]interface{} "Min and Max tour prices"
 // @Failure 500 {object} errorResponse "Internal Server Error"
-// @Router /tour/prices [get]
+// @Router /tours/prices [get]
 func (h *Handler) getMinMaxPrice(c *gin.Context) {
 	minPrice, maxPrice, err := h.services.Tour.GetMinMaxPrice()
 	if err != nil {

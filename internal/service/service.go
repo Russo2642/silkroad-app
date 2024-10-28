@@ -1,6 +1,7 @@
 package service
 
 import (
+	"mime/multipart"
 	"silkroad/m/internal/domain/forms"
 	"silkroad/m/internal/domain/tour"
 	"silkroad/m/internal/repository"
@@ -24,6 +25,7 @@ type Tour interface {
 	GetById(tourId int) (tour.Tour, error)
 	GetBySlug(tourSlug string) (tour.Tour, error)
 	GetMinMaxPrice() (int, int, error)
+	AddPhotos(tourID int, files []*multipart.FileHeader) error
 }
 
 type TourEditor interface {

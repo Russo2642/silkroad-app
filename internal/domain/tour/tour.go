@@ -42,6 +42,7 @@ type Tour struct {
 	Activity             []string         `json:"activity" db:"activity" binding:"required"`
 	Tariff               string           `json:"tariff" db:"tariff"`
 	TourDate             time.Time        `json:"tour_date" db:"tour_date" binding:"required"`
+	Photos               []string         `json:"photos" db:"photos"`
 }
 
 func IsValidTourType(t TourType) bool {

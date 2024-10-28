@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/context"
 	"os"
 	"os/signal"
+	"silkroad/m/internal/aws"
 	"silkroad/m/internal/config"
 	"silkroad/m/internal/delivery/http"
 	"silkroad/m/internal/repository"
@@ -31,6 +32,8 @@ func main() {
 	if err := config.InitConfig("configs", "config"); err != nil {
 		logrus.Fatalf("init config err: %s", err.Error())
 	}
+
+	aws.InitS3Client()
 
 	db, err := pg.NewPostgresDB(pg.Config{
 		Host:     os.Getenv("DB_HOST"),
@@ -78,6 +81,9 @@ func main() {
 	}
 
 	if db != nil {
-		db.Close()
+		err := db.Close()
+		if err != nil {
+			return
+		}
 	}
 }

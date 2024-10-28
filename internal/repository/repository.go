@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/jmoiron/sqlx"
+	"mime/multipart"
 	"silkroad/m/internal/domain/forms"
 	"silkroad/m/internal/domain/tour"
 	"silkroad/m/internal/repository/pg"
@@ -20,6 +21,7 @@ type Tour interface {
 	GetAll(tourPlace, tourDate, searchTitle string, quantity []int, priceMin, priceMax, duration, limit, offset int) ([]tour.Tour, int, int, int, int, []string, error)
 	GetTourByField(field, value string) (tour.Tour, error)
 	GetMinMaxPrice() (int, int, error)
+	AddPhotos(tourID int, files []*multipart.FileHeader) error
 }
 
 type TourEditor interface {

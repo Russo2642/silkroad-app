@@ -91,6 +91,10 @@ definitions:
         type: integer
       id:
         type: integer
+      photos:
+        items:
+          type: string
+        type: array
       physical_rating:
         maximum: 5
         minimum: 1
@@ -277,7 +281,39 @@ paths:
       summary: Create a help with tour form
       tags:
       - forms
-  /tour:
+  /tour_editor:
+    post:
+      consumes:
+      - application/json
+      description: This method allows users to create a custom tour by submitting
+        their details and tour preferences. The tour data will also be sent to Telegram.
+      parameters:
+      - description: Custom tour data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/tour.TourEditor'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ID and creation status of the tour
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Create a custom tour
+      tags:
+      - tour
+  /tours:
     get:
       consumes:
       - application/json
@@ -335,7 +371,7 @@ paths:
             $ref: '#/definitions/http.errorResponse'
       summary: Returns a list of tours
       tags:
-      - tour
+      - tours
     post:
       consumes:
       - application/json
@@ -369,8 +405,8 @@ paths:
             $ref: '#/definitions/http.errorResponse'
       summary: Creates a new tour
       tags:
-      - tour
-  /tour/{id}:
+      - tours
+  /tours/{id}:
     get:
       consumes:
       - application/json
@@ -394,8 +430,8 @@ paths:
             $ref: '#/definitions/http.errorResponse'
       summary: Returns tour by ID
       tags:
-      - tour
-  /tour/prices:
+      - tours
+  /tours/prices:
     get:
       consumes:
       - application/json
@@ -415,8 +451,8 @@ paths:
             $ref: '#/definitions/http.errorResponse'
       summary: Returns the minimum and maximum prices of all tours
       tags:
-      - tour
-  /tour/title/{slug}:
+      - tours
+  /tours/title/{slug}:
     get:
       consumes:
       - application/json
@@ -441,37 +477,5 @@ paths:
             $ref: '#/definitions/http.errorResponse'
       summary: Returns tour details by slug
       tags:
-      - tour
-  /tour_editor:
-    post:
-      consumes:
-      - application/json
-      description: This method allows users to create a custom tour by submitting
-        their details and tour preferences. The tour data will also be sent to Telegram.
-      parameters:
-      - description: Custom tour data
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/tour.TourEditor'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: ID and creation status of the tour
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/http.errorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/http.errorResponse'
-      summary: Create a custom tour
-      tags:
-      - tour
+      - tours
 swagger: "2.0"

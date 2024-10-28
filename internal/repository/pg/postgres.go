@@ -8,7 +8,7 @@ import (
 const (
 	contactFormTable      = "contact_form"
 	helpWithTourFormTable = "help_with_tour_form"
-	tourTable             = "tour"
+	tourTable             = "tours"
 	tourEditorTable       = "tour_editor"
 )
 

@@ -163,7 +163,54 @@ const docTemplate = `{
                 }
             }
         },
-        "/tour": {
+        "/tour_editor": {
+            "post": {
+                "description": "This method allows users to create a custom tour by submitting their details and tour preferences. The tour data will also be sent to Telegram.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tour"
+                ],
+                "summary": "Create a custom tour",
+                "parameters": [
+                    {
+                        "description": "Custom tour data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/tour.TourEditor"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ID and creation status of the tour",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tours": {
             "get": {
                 "description": "This method returns a list of tours. You can filter by price range, tour place, tour date, quantity, duration, and search by title. Pagination is also supported via limit and offset.",
                 "consumes": [
@@ -173,7 +220,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tour"
+                    "tours"
                 ],
                 "summary": "Returns a list of tours",
                 "parameters": [
@@ -256,7 +303,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tour"
+                    "tours"
                 ],
                 "summary": "Creates a new tour",
                 "parameters": [
@@ -299,7 +346,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/tour/prices": {
+        "/tours/prices": {
             "get": {
                 "description": "This method returns the minimum and maximum prices of all available tours",
                 "consumes": [
@@ -309,7 +356,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tour"
+                    "tours"
                 ],
                 "summary": "Returns the minimum and maximum prices of all tours",
                 "responses": {
@@ -329,7 +376,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/tour/title/{slug}": {
+        "/tours/title/{slug}": {
             "get": {
                 "description": "This method returns the details of a specific tour based on its slug",
                 "consumes": [
@@ -339,7 +386,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tour"
+                    "tours"
                 ],
                 "summary": "Returns tour details by slug",
                 "parameters": [
@@ -367,7 +414,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/tour/{id}": {
+        "/tours/{id}": {
             "get": {
                 "description": "This method returns the details of a specific tour by its ID",
                 "consumes": [
@@ -377,7 +424,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tour"
+                    "tours"
                 ],
                 "summary": "Returns tour by ID",
                 "parameters": [
@@ -398,53 +445,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/tour_editor": {
-            "post": {
-                "description": "This method allows users to create a custom tour by submitting their details and tour preferences. The tour data will also be sent to Telegram.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tour"
-                ],
-                "summary": "Create a custom tour",
-                "parameters": [
-                    {
-                        "description": "Custom tour data",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/tour.TourEditor"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "ID and creation status of the tour",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/http.errorResponse"
                         }
@@ -604,6 +604,12 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "photos": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "physical_rating": {
                     "type": "integer",
