@@ -66,5 +66,7 @@ jobs:
               -e DB_SSLMODE=${{ secrets.DB_SSLMODE }} \
               -e TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} \
               -e TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }} \
+              -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
               ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           EOF
