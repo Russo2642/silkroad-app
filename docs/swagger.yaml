@@ -72,8 +72,10 @@ definitions:
         items:
           type: string
         type: array
-    required:
-    - default
+      photos:
+        items:
+          type: string
+        type: array
     type: object
   tour.Tour:
     properties:
@@ -435,13 +437,19 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: Uploads multiple photos for a specific tour by tourID.
+      description: Uploads multiple photos for a specific tour by tourID, allowing
+        the update of either the gallery or the route description.
       parameters:
       - description: Tour ID
         in: path
         name: tourID
         required: true
         type: integer
+      - description: Field to update (gallery or route)
+        in: query
+        name: updateField
+        required: true
+        type: string
       - description: Photos to upload
         in: formData
         name: photos
@@ -456,7 +464,8 @@ paths:
             additionalProperties: true
             type: object
         "400":
-          description: 'status: Bad Request, message: Invalid tourID or form data'
+          description: 'status: Bad Request, message: Invalid tourID, updateField
+            or form data'
           schema:
             additionalProperties: true
             type: object

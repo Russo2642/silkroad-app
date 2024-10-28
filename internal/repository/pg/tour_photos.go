@@ -57,16 +57,15 @@ func (r *TourPostgres) AddPhotos(tourID int, files []*multipart.FileHeader, upda
 
 	var updateQuery string
 	if updateField == "gallery" {
-		updateQuery := fmt.Sprintf("UPDATE %s SET photos = array_cat(COALESCE(photos, ARRAY[]::text[]), $1) WHERE id = $2", tourTable)
+		updateQuery = fmt.Sprintf("UPDATE %s SET photos = array_cat(COALESCE(photos, ARRAY[]::text[]), $1) WHERE id = $2", tourTable)
 		_, err = tx.Exec(updateQuery, pq.Array(photoUrls), tourID)
 	} else if updateField == "route" {
-		updateQuery = fmt.Sprintf("UPDATE %s SET description_route = jsonb_set(description_route::jsonb, '{photos}', $1::jsonb) WHERE id = $2", tourTable)
-		descriptionRouteJSON, err := json.Marshal(map[string]interface{}{
-			"photos": photoUrls,
-		})
-		if err == nil {
-			_, err = tx.Exec(updateQuery, descriptionRouteJSON, tourID)
+		descriptionRouteJSON, err := json.Marshal(photoUrls)
+		if err != nil {
+			return fmt.Errorf("failed to marshal photo URLs: %w", err)
 		}
+		updateQuery = fmt.Sprintf("UPDATE %s SET description_route = jsonb_set(description_route::jsonb, '{photos}', $1::jsonb) WHERE id = $2", tourTable)
+		_, err = tx.Exec(updateQuery, descriptionRouteJSON, tourID)
 	}
 
 	if err != nil {

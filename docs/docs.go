@@ -348,7 +348,7 @@ const docTemplate = `{
         },
         "/tours/photos/{tourID}": {
             "post": {
-                "description": "Uploads multiple photos for a specific tour by tourID.",
+                "description": "Uploads multiple photos for a specific tour by tourID, allowing the update of either the gallery or the route description.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -368,6 +368,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Field to update (gallery or route)",
+                        "name": "updateField",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
                         "type": "file",
                         "description": "Photos to upload",
                         "name": "photos",
@@ -384,7 +391,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "status: Bad Request, message: Invalid tourID or form data",
+                        "description": "status: Bad Request, message: Invalid tourID, updateField or form data",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -602,9 +609,6 @@ const docTemplate = `{
         },
         "tour.DescriptionRoute": {
             "type": "object",
-            "required": [
-                "default"
-            ],
             "properties": {
                 "default": {
                     "type": "array",
@@ -613,6 +617,12 @@ const docTemplate = `{
                     }
                 },
                 "next": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "photos": {
                     "type": "array",
                     "items": {
                         "type": "string"
