@@ -21,7 +21,7 @@ type Tour interface {
 	GetAll(tourPlace, tourDate, searchTitle string, quantity []int, priceMin, priceMax, duration, limit, offset int) ([]tour.Tour, int, int, int, int, []string, error)
 	GetTourByField(field, value string) (tour.Tour, error)
 	GetMinMaxPrice() (int, int, error)
-	AddPhotos(tourID int, files []*multipart.FileHeader) error
+	AddPhotos(tourID int, files []*multipart.FileHeader, updateField string) error
 }
 
 type TourEditor interface {

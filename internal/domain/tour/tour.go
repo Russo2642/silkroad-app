@@ -6,14 +6,10 @@ import (
 
 type TourType string
 
-type TimeSlot struct {
-	From string `json:"from"`
-	To   string `json:"to"`
-}
-
 type DescriptionRoute struct {
-	Default []string `json:"default" db:"default" binding:"required"`
+	Default []string `json:"default" db:"default"`
 	Next    []string `json:"next" db:"next"`
+	Photos  []string `json:"photos" db:"photos"`
 }
 
 const (

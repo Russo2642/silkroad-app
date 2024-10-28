@@ -25,7 +25,7 @@ type Tour interface {
 	GetById(tourId int) (tour.Tour, error)
 	GetBySlug(tourSlug string) (tour.Tour, error)
 	GetMinMaxPrice() (int, int, error)
-	AddPhotos(tourID int, files []*multipart.FileHeader) error
+	AddPhotos(tourID int, files []*multipart.FileHeader, updateField string) error
 }
 
 type TourEditor interface {

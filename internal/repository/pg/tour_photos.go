@@ -2,13 +2,14 @@ package pg
 
 import (
 	"fmt"
+	"github.com/goccy/go-json"
 	"github.com/lib/pq"
 	"mime/multipart"
 	"silkroad/m/internal/aws"
 	"time"
 )
 
-func (r *TourPostgres) AddPhotos(tourID int, files []*multipart.FileHeader) error {
+func (r *TourPostgres) AddPhotos(tourID int, files []*multipart.FileHeader, updateField string) error {
 	var exists bool
 	checkQuery := fmt.Sprintf("SELECT EXISTS(SELECT 1 FROM %s WHERE id = $1)", tourTable)
 	err := r.db.QueryRow(checkQuery, tourID).Scan(&exists)
@@ -54,8 +55,20 @@ func (r *TourPostgres) AddPhotos(tourID int, files []*multipart.FileHeader) erro
 		}
 	}
 
-	updatePhotosQuery := fmt.Sprintf("UPDATE %s SET photos = array_cat(COALESCE(photos, ARRAY[]::text[]), $1) WHERE id = $2", tourTable)
-	_, err = tx.Exec(updatePhotosQuery, pq.Array(photoUrls), tourID)
+	var updateQuery string
+	if updateField == "gallery" {
+		updateQuery := fmt.Sprintf("UPDATE %s SET photos = array_cat(COALESCE(photos, ARRAY[]::text[]), $1) WHERE id = $2", tourTable)
+		_, err = tx.Exec(updateQuery, pq.Array(photoUrls), tourID)
+	} else if updateField == "route" {
+		updateQuery = fmt.Sprintf("UPDATE %s SET description_route = jsonb_set(description_route::jsonb, '{photos}', $1::jsonb) WHERE id = $2", tourTable)
+		descriptionRouteJSON, err := json.Marshal(map[string]interface{}{
+			"photos": photoUrls,
+		})
+		if err == nil {
+			_, err = tx.Exec(updateQuery, descriptionRouteJSON, tourID)
+		}
+	}
+
 	if err != nil {
 		_ = tx.Rollback()
 		return err

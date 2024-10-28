@@ -8,20 +8,27 @@ import (
 
 // uploadTourPhotos godoc
 // @Summary Upload photos for a tour
-// @Description Uploads multiple photos for a specific tour by tourID.
+// @Description Uploads multiple photos for a specific tour by tourID, allowing the update of either the gallery or the route description.
 // @Tags tours
 // @Accept multipart/form-data
 // @Produce json
 // @Param tourID path int true "Tour ID"
+// @Param updateField query string true "Field to update (gallery or route)"
 // @Param photos formData file true "Photos to upload" multiple
 // @Success 200 {object} map[string]interface{} "status: OK, message: Photos uploaded successfully"
-// @Failure 400 {object} map[string]interface{} "status: Bad Request, message: Invalid tourID or form data"
+// @Failure 400 {object} map[string]interface{} "status: Bad Request, message: Invalid tourID, updateField or form data"
 // @Failure 500 {object} map[string]interface{} "status: Internal Server Error, message: Error message"
 // @Router /tours/photos/{tourID} [post]
 func (h *Handler) uploadTourPhotos(c *gin.Context) {
 	tourID, err := strconv.Atoi(c.Param("tourID"))
 	if err != nil || tourID < 1 {
 		newErrorResponse(c, http.StatusBadRequest, "Invalid tourID")
+		return
+	}
+
+	updateField := c.Query("updateField")
+	if updateField != "gallery" && updateField != "route" {
+		newErrorResponse(c, http.StatusBadRequest, "Invalid updateField")
 		return
 	}
 
@@ -32,7 +39,7 @@ func (h *Handler) uploadTourPhotos(c *gin.Context) {
 	}
 	files := form.File["photos"]
 
-	err = h.services.Tour.AddPhotos(tourID, files)
+	err = h.services.Tour.AddPhotos(tourID, files, updateField)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
