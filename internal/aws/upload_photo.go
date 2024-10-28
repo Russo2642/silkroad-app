@@ -34,7 +34,6 @@ func UploadPhotoToS3(bucketName, key string, file multipart.File) (string, error
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(key),
 		Body:   bytes.NewReader(buf.Bytes()),
-		ACL:    "public-read",
 	})
 	if err != nil {
 		return "", fmt.Errorf("uploadPhotoToS3: failed to upload object: %v", err)

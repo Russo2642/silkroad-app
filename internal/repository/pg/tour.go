@@ -174,7 +174,7 @@ func (r *TourPostgres) buildQuery(tourPlace, tourDate, searchTitle string, quant
 	}
 
 	if searchTitle != "" {
-		filters = append(filters, fmt.Sprintf("title LIKE $%d", argCount))
+		filters = append(filters, fmt.Sprintf("title ILIKE $%d", argCount))
 		args = append(args, "%"+searchTitle+"%")
 		argCount++
 	}
