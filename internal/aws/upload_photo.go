@@ -8,6 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"io"
 	"mime/multipart"
+	"net/http"
+	"os"
 )
 
 func processFile(file multipart.File) (*bytes.Buffer, error) {
@@ -31,15 +33,16 @@ func UploadPhotoToS3(bucketName, key string, file multipart.File) (string, error
 	}(file)
 
 	_, err = s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(key),
-		Body:   bytes.NewReader(buf.Bytes()),
+		Bucket:      aws.String(bucketName),
+		Key:         aws.String(key),
+		Body:        bytes.NewReader(buf.Bytes()),
+		ContentType: aws.String(http.DetectContentType(buf.Bytes())),
 	})
 	if err != nil {
 		return "", fmt.Errorf("uploadPhotoToS3: failed to upload object: %v", err)
 	}
 
-	url := fmt.Sprintf("https://s3-%s.amazonaws.com/%s", bucketName, key)
+	url := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", bucketName, os.Getenv("AWS_REGION"), key)
 
 	return url, nil
 }
