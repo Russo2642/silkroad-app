@@ -9,6 +9,17 @@ import (
 )
 
 func (r *TourPostgres) AddPhotos(tourID int, files []*multipart.FileHeader) error {
+	var exists bool
+	checkQuery := fmt.Sprintf("SELECT EXISTS(SELECT 1 FROM %s WHERE id = $1)", tourTable)
+	err := r.db.QueryRow(checkQuery, tourID).Scan(&exists)
+	if err != nil {
+		return fmt.Errorf("failed to check tour existence: %w", err)
+	}
+
+	if !exists {
+		return fmt.Errorf("tour with id %d does not exist", tourID)
+	}
+
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -43,7 +54,7 @@ func (r *TourPostgres) AddPhotos(tourID int, files []*multipart.FileHeader) erro
 		}
 	}
 
-	updatePhotosQuery := fmt.Sprintf("UPDATE %s SET photos = array_cat(COALESCE(photos, '{}'), $1) WHERE id = $2", tourTable)
+	updatePhotosQuery := fmt.Sprintf("UPDATE %s SET photos = $1 WHERE id = $2", tourTable)
 	_, err = tx.Exec(updatePhotosQuery, pq.Array(photoUrls), tourID)
 	if err != nil {
 		_ = tx.Rollback()
