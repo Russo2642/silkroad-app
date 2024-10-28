@@ -431,6 +431,43 @@ paths:
       summary: Returns tour by ID
       tags:
       - tours
+  /tours/photos/{tourID}:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads multiple photos for a specific tour by tourID.
+      parameters:
+      - description: Tour ID
+        in: path
+        name: tourID
+        required: true
+        type: integer
+      - description: Photos to upload
+        in: formData
+        name: photos
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: OK, message: Photos uploaded successfully'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 'status: Bad Request, message: Invalid tourID or form data'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 'status: Internal Server Error, message: Error message'
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Upload photos for a tour
+      tags:
+      - tours
   /tours/prices:
     get:
       consumes:
