@@ -72,10 +72,6 @@ definitions:
         items:
           type: string
         type: array
-      photos:
-        items:
-          type: string
-        type: array
     type: object
   tour.Tour:
     properties:
@@ -83,6 +79,8 @@ definitions:
         items:
           type: string
         type: array
+      book_tour_photos:
+        type: string
       currency:
         type: string
       description_excursion:
@@ -91,20 +89,26 @@ definitions:
         $ref: '#/definitions/tour.DescriptionRoute'
       duration:
         type: integer
-      id:
-        type: integer
-      photos:
+      gallery_photos:
         items:
           type: string
         type: array
+      id:
+        type: integer
       physical_rating:
         maximum: 5
         minimum: 1
         type: integer
+      preview_photo:
+        type: string
       price:
         type: integer
       quantity:
         type: integer
+      route_photos:
+        items:
+          type: string
+        type: array
       season:
         type: string
       slug:
@@ -184,7 +188,35 @@ info:
   title: SilkRoad App API
   version: "1.0"
 paths:
-  /contact_form:
+  /countries:
+    get:
+      consumes:
+      - application/json
+      description: This method returns a list of all available countries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of countries
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Returns a list of countries
+      tags:
+      - countries
+  /form/contact_form:
     post:
       consumes:
       - application/json
@@ -220,35 +252,7 @@ paths:
       summary: Create a contact form
       tags:
       - forms
-  /countries:
-    get:
-      consumes:
-      - application/json
-      description: This method returns a list of all available countries
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of countries
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/http.errorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/http.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/http.errorResponse'
-      summary: Returns a list of countries
-      tags:
-      - countries
-  /help_with_tour_form:
+  /form/help_with_tour_form:
     post:
       consumes:
       - application/json
@@ -445,9 +449,9 @@ paths:
         name: tourID
         required: true
         type: integer
-      - description: Field to update (gallery or route)
+      - description: Type to update (gallery, route, preview, book)
         in: query
-        name: updateField
+        name: photoType
         required: true
         type: string
       - description: Photos to upload

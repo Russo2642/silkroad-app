@@ -13,7 +13,7 @@ import (
 // @Accept multipart/form-data
 // @Produce json
 // @Param tourID path int true "Tour ID"
-// @Param updateField query string true "Field to update (gallery or route)"
+// @Param photoType query string true "Type to update (gallery, route, preview, book)"
 // @Param photos formData file true "Photos to upload" multiple
 // @Success 200 {object} map[string]interface{} "status: OK, message: Photos uploaded successfully"
 // @Failure 400 {object} map[string]interface{} "status: Bad Request, message: Invalid tourID, updateField or form data"

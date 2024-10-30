@@ -18,7 +18,7 @@ import (
 // @Success 201 {object} map[string]interface{} "Created"
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
-// @Router /help_with_tour_form [post]
+// @Router /form/help_with_tour_form [post]
 func (h *Handler) createHelpWithTourForm(c *gin.Context) {
 	var input forms.HelpWithTourForm
 	if err := c.ShouldBindJSON(&input); err != nil {

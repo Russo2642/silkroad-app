@@ -15,7 +15,49 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/contact_form": {
+        "/countries": {
+            "get": {
+                "description": "This method returns a list of all available countries",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "countries"
+                ],
+                "summary": "Returns a list of countries",
+                "responses": {
+                    "200": {
+                        "description": "List of countries",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/form/contact_form": {
             "post": {
                 "description": "This method creates a new contact form and, if TourID is provided, sends tour details",
                 "consumes": [
@@ -68,49 +110,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/countries": {
-            "get": {
-                "description": "This method returns a list of all available countries",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "countries"
-                ],
-                "summary": "Returns a list of countries",
-                "responses": {
-                    "200": {
-                        "description": "List of countries",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/help_with_tour_form": {
+        "/form/help_with_tour_form": {
             "post": {
                 "description": "This method creates a new helpWithTour form",
                 "consumes": [
@@ -369,8 +369,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Field to update (gallery or route)",
-                        "name": "updateField",
+                        "description": "Type to update (gallery, route, preview, book)",
+                        "name": "photoType",
                         "in": "query",
                         "required": true
                     },
@@ -621,12 +621,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "photos": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },
@@ -654,6 +648,9 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "book_tour_photos": {
+                    "type": "string"
+                },
                 "currency": {
                     "type": "string"
                 },
@@ -666,25 +663,34 @@ const docTemplate = `{
                 "duration": {
                     "type": "integer"
                 },
-                "id": {
-                    "type": "integer"
-                },
-                "photos": {
+                "gallery_photos": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "physical_rating": {
                     "type": "integer",
                     "maximum": 5,
                     "minimum": 1
                 },
+                "preview_photo": {
+                    "type": "string"
+                },
                 "price": {
                     "type": "integer"
                 },
                 "quantity": {
                     "type": "integer"
+                },
+                "route_photos": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "season": {
                     "type": "string"
