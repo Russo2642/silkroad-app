@@ -29,14 +29,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	api := router.Group("/api")
 	{
-		contactForm := api.Group("/contact_form")
+		form := api.Group("/form")
 		{
-			contactForm.POST("/", h.createContactForm)
-		}
-
-		helpWithTourForm := api.Group("/help_form")
-		{
-			helpWithTourForm.POST("/", h.createHelpWithTourForm)
+			form.POST("/contact-form", h.createContactForm)
+			form.POST("/help-with-tour-form", h.createHelpWithTourForm)
 		}
 
 		getCountries := api.Group("/countries")

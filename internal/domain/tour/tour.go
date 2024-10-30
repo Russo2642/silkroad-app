@@ -9,7 +9,6 @@ type TourType string
 type DescriptionRoute struct {
 	Default []string `json:"default" db:"default"`
 	Next    []string `json:"next" db:"next"`
-	Photos  []string `json:"photos" db:"photos"`
 }
 
 const (
@@ -38,7 +37,10 @@ type Tour struct {
 	Activity             []string         `json:"activity" db:"activity" binding:"required"`
 	Tariff               string           `json:"tariff" db:"tariff"`
 	TourDate             time.Time        `json:"tour_date" db:"tour_date" binding:"required"`
-	Photos               []string         `json:"photos" db:"photos"`
+	GalleryPhotos        []string         `json:"gallery_photos"`
+	RoutePhotos          []string         `json:"route_photos"`
+	PreviewPhoto         string           `json:"preview_photo"`
+	BookTourPhotos       string           `json:"book_tour_photos"`
 }
 
 func IsValidTourType(t TourType) bool {

@@ -10,6 +10,7 @@ const (
 	helpWithTourFormTable = "help_with_tour_form"
 	tourTable             = "tours"
 	tourEditorTable       = "tour_editor"
+	tourPhotosTable       = "tour_photos"
 )
 
 type Config struct {

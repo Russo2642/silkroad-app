@@ -26,8 +26,8 @@ func (h *Handler) uploadTourPhotos(c *gin.Context) {
 		return
 	}
 
-	updateField := c.Query("updateField")
-	if updateField != "gallery" && updateField != "route" {
+	photoType := c.Query("photoType")
+	if photoType != "gallery" && photoType != "route" && photoType != "preview" && photoType != "book" {
 		newErrorResponse(c, http.StatusBadRequest, "Invalid updateField")
 		return
 	}
@@ -39,7 +39,7 @@ func (h *Handler) uploadTourPhotos(c *gin.Context) {
 	}
 	files := form.File["photos"]
 
-	err = h.services.Tour.AddPhotos(tourID, files, updateField)
+	err = h.services.Tour.AddPhotos(tourID, files, photoType)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

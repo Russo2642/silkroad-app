@@ -61,14 +61,15 @@ func (r *TourPostgres) Create(tour tour.Tour) (int, error) {
 	}
 
 	var id int
-	createTourQuery := fmt.Sprintf("INSERT INTO %s (tour_type, slug, title, tour_place, season, quantity, duration, "+
-		"physical_rating, description_excursion, description_route, price, currency, activity, tariff, tour_date, photos)"+
-		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id",
+	createTourQuery := fmt.Sprintf(`
+			INSERT INTO %s (tour_type, slug, title, tour_place, season, quantity, duration, physical_rating, 
+		    description_excursion, description_route, price, currency, activity, tariff, tour_date
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id`,
 		tourTable)
 
-	row := tx.QueryRow(createTourQuery, tour.TourType, tour.Slug, tour.Title, tour.TourPlace, tour.Season, tour.Quantity, tour.Duration,
-		tour.PhysicalRating, tour.DescriptionExcursion, descriptionRouteJSON, tour.Price, tour.Currency,
-		pq.Array(tour.Activity), tour.Tariff, tour.TourDate, pq.Array(tour.Photos))
+	row := tx.QueryRow(createTourQuery, tour.TourType, tour.Slug, tour.Title, tour.TourPlace, tour.Season,
+		tour.Quantity, tour.Duration, tour.PhysicalRating, tour.DescriptionExcursion, descriptionRouteJSON,
+		tour.Price, tour.Currency, pq.Array(tour.Activity), tour.Tariff, tour.TourDate)
 
 	if err := row.Scan(&id); err != nil {
 		err := tx.Rollback()
@@ -127,9 +128,11 @@ func (r *TourPostgres) buildQuery(tourPlace, tourDate, searchTitle string, quant
 	var args []interface{}
 	argCount := 1
 
-	query := fmt.Sprintf("SELECT id, tour_type, slug, title, tour_place, season, quantity, duration, "+
-		"physical_rating, description_excursion, description_route, price, currency, activity, tariff, tour_date,"+
-		" photos FROM %s", tourTable)
+	query := fmt.Sprintf(`
+			SELECT id, tour_type, slug, title, tour_place, season, quantity, duration, physical_rating,
+			description_excursion, description_route, price, currency, activity, tariff, tour_date
+			FROM %s`,
+		tourTable)
 
 	if priceMin > 0 && priceMax > 0 {
 		filters = append(filters, fmt.Sprintf("price BETWEEN $%d AND $%d ", argCount, argCount+1))
@@ -207,8 +210,10 @@ func (r *TourPostgres) executeQuery(query string, args []interface{}) ([]tour.To
 		var t tour.Tour
 		var descriptionRouteJSON []byte
 
-		err := rows.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration, &t.PhysicalRating,
-			&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate, pq.Array(&t.Photos))
+		err := rows.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration,
+			&t.PhysicalRating, &t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency,
+			pq.Array(&t.Activity), &t.Tariff, &t.TourDate)
+
 		if err != nil {
 			return nil, err
 		}
@@ -219,6 +224,16 @@ func (r *TourPostgres) executeQuery(query string, args []interface{}) ([]tour.To
 				return nil, err
 			}
 		}
+
+		galleryPhotos, routePhotos, previewPhoto, bookTourPhoto, err := r.getPhotosByTourID(t.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		t.GalleryPhotos = galleryPhotos
+		t.RoutePhotos = routePhotos
+		t.PreviewPhoto = previewPhoto
+		t.BookTourPhotos = bookTourPhoto
 
 		tours = append(tours, t)
 	}
@@ -234,13 +249,17 @@ func (r *TourPostgres) GetTourByField(field, value string) (tour.Tour, error) {
 	var t tour.Tour
 	var descriptionRouteJSON []byte
 
-	query := fmt.Sprintf("SELECT id, tour_type, slug, title, tour_place, season, quantity, duration, physical_rating, "+
-		"description_excursion, description_route, price, currency, activity, tariff, tour_date, photos FROM %s WHERE %s = $1",
+	query := fmt.Sprintf(`
+			SELECT id, tour_type, slug, title, tour_place, season, quantity, duration, physical_rating,
+			description_excursion, description_route, price, currency, activity, tariff, tour_date
+			FROM %s WHERE %s = $1`,
 		tourTable, field)
 
 	row := r.db.QueryRow(query, value)
-	err := row.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration, &t.PhysicalRating,
-		&t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency, pq.Array(&t.Activity), &t.Tariff, &t.TourDate, pq.Array(&t.Photos))
+	err := row.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration,
+		&t.PhysicalRating, &t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency,
+		pq.Array(&t.Activity), &t.Tariff, &t.TourDate)
+
 	if errors.Is(err, sql.ErrNoRows) {
 		return t, nil
 	} else if err != nil {
@@ -251,6 +270,44 @@ func (r *TourPostgres) GetTourByField(field, value string) (tour.Tour, error) {
 		if err := json.Unmarshal(descriptionRouteJSON, &t.DescriptionRoute); err != nil {
 			return t, err
 		}
+	}
+
+	photosQuery := fmt.Sprintf(`
+		SELECT photo_url, photo_type 
+		FROM %s 
+		WHERE tour_id = $1`,
+		tourPhotosTable)
+	rows, err := r.db.Query(photosQuery, t.Id)
+	if err != nil {
+		return t, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
+
+	for rows.Next() {
+		var photoURL, photoType string
+		if err := rows.Scan(&photoURL, &photoType); err != nil {
+			return t, err
+		}
+
+		switch photoType {
+		case "gallery":
+			t.GalleryPhotos = append(t.GalleryPhotos, photoURL)
+		case "route":
+			t.RoutePhotos = append(t.RoutePhotos, photoURL)
+		case "preview":
+			t.PreviewPhoto = photoURL
+		case "book":
+			t.BookTourPhotos = photoURL
+		}
+	}
+
+	if err = rows.Err(); err != nil {
+		return t, err
 	}
 
 	return t, nil
