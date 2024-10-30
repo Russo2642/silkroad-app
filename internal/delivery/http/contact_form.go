@@ -18,7 +18,7 @@ import (
 // @Success 201 {object} map[string]interface{} "Created"
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
-// @Router /form/contact-form [post]
+// @Router /form/contact_form [post]
 func (h *Handler) createContactForm(c *gin.Context) {
 	var input forms.ContactForm
 	if err := c.ShouldBindJSON(&input); err != nil {
