@@ -212,7 +212,7 @@ const docTemplate = `{
         },
         "/tours": {
             "get": {
-                "description": "This method returns a list of tours. You can filter by price range, tour place, tour date, quantity, duration, and search by title. Pagination is also supported via limit and offset.",
+                "description": "Получение списка туров с возможностью фильтрации по местоположению, дате, названию, количеству, цене, продолжительности, популярности и другим параметрам",
                 "consumes": [
                     "application/json"
                 ],
@@ -222,66 +222,78 @@ const docTemplate = `{
                 "tags": [
                     "tours"
                 ],
-                "summary": "Returns a list of tours",
+                "summary": "Get all tours",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Filter by tour place",
+                        "description": "Tour place",
                         "name": "tour_place",
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "description": "Filter by quantity of people",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Quantity (array of integers)",
                         "name": "quantity",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Filter by price range (from min), example: 100",
+                        "description": "Minimum price",
                         "name": "priceMin",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Filter by price range (to max), example: 500",
+                        "description": "Maximum price",
                         "name": "priceMax",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Filter by duration of the tour",
+                        "description": "Duration",
                         "name": "duration",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Filter by date of the tour, format: YYYY-MM-DDT00:00:00+00:00",
+                        "description": "Tour date",
                         "name": "tour_date",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Search tours by title",
+                        "description": "Search by title",
                         "name": "search",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Limit the number of returned tours",
+                        "default": 4,
+                        "description": "Limit for pagination",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "integer",
+                        "default": 0,
                         "description": "Offset for pagination",
                         "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by popular tours",
+                        "name": "popular",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of tours / CurrentPage / ItemsPerPage / TotalItems / TotalPages / TourPlaces",
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/http.getAllToursResponse"
                         }
@@ -676,6 +688,9 @@ const docTemplate = `{
                     "type": "integer",
                     "maximum": 5,
                     "minimum": 1
+                },
+                "popular": {
+                    "type": "boolean"
                 },
                 "preview_photo": {
                     "type": "string"

@@ -82,8 +82,8 @@ func (r *TourPostgres) Create(tour tour.Tour) (int, error) {
 	return id, tx.Commit()
 }
 
-func (r *TourPostgres) GetAll(tourPlace, tourDate, searchTitle string, quantity []int, priceMin, priceMax, duration, limit, offset int) ([]tour.Tour, int, int, int, int, []string, error) {
-	query, args := r.buildQuery(tourPlace, tourDate, searchTitle, quantity, priceMin, priceMax, duration, limit, offset)
+func (r *TourPostgres) GetAll(tourPlace, tourDate, searchTitle string, quantity []int, priceMin, priceMax, duration, limit, offset int, popular bool) ([]tour.Tour, int, int, int, int, []string, error) {
+	query, args := r.buildQuery(tourPlace, tourDate, searchTitle, quantity, priceMin, priceMax, duration, limit, offset, popular)
 
 	totalQuery := "SELECT COUNT(*) FROM (" + query + ") AS count_query"
 	var totalItems int
@@ -123,14 +123,14 @@ func (r *TourPostgres) GetAll(tourPlace, tourDate, searchTitle string, quantity 
 	return tours, currentPage, limit, totalItems, totalPages, tourPlaces, nil
 }
 
-func (r *TourPostgres) buildQuery(tourPlace, tourDate, searchTitle string, quantity []int, priceMin, priceMax, duration, limit, offset int) (string, []interface{}) {
+func (r *TourPostgres) buildQuery(tourPlace, tourDate, searchTitle string, quantity []int, priceMin, priceMax, duration, limit, offset int, popular bool) (string, []interface{}) {
 	var filters []string
 	var args []interface{}
 	argCount := 1
 
 	query := fmt.Sprintf(`
 			SELECT id, tour_type, slug, title, tour_place, season, quantity, duration, physical_rating,
-			description_excursion, description_route, price, currency, activity, tariff, tour_date
+			description_excursion, description_route, price, currency, activity, tariff, tour_date, popular
 			FROM %s`,
 		tourTable)
 
@@ -156,6 +156,10 @@ func (r *TourPostgres) buildQuery(tourPlace, tourDate, searchTitle string, quant
 			argCount++
 		}
 		filters = append(filters, fmt.Sprintf("quantity IN (%s)", strings.Join(placeholders, ",")))
+	}
+
+	if popular {
+		filters = append(filters, fmt.Sprintf("popular=%t", popular))
 	}
 
 	if tourPlace != "" {
@@ -212,7 +216,7 @@ func (r *TourPostgres) executeQuery(query string, args []interface{}) ([]tour.To
 
 		err := rows.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration,
 			&t.PhysicalRating, &t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency,
-			pq.Array(&t.Activity), &t.Tariff, &t.TourDate)
+			pq.Array(&t.Activity), &t.Tariff, &t.TourDate, &t.Popular)
 
 		if err != nil {
 			return nil, err
@@ -251,14 +255,14 @@ func (r *TourPostgres) GetTourByField(field, value string) (tour.Tour, error) {
 
 	query := fmt.Sprintf(`
 			SELECT id, tour_type, slug, title, tour_place, season, quantity, duration, physical_rating,
-			description_excursion, description_route, price, currency, activity, tariff, tour_date
+			description_excursion, description_route, price, currency, activity, tariff, tour_date, popular
 			FROM %s WHERE %s = $1`,
 		tourTable, field)
 
 	row := r.db.QueryRow(query, value)
 	err := row.Scan(&t.Id, &t.TourType, &t.Slug, &t.Title, &t.TourPlace, &t.Season, &t.Quantity, &t.Duration,
 		&t.PhysicalRating, &t.DescriptionExcursion, &descriptionRouteJSON, &t.Price, &t.Currency,
-		pq.Array(&t.Activity), &t.Tariff, &t.TourDate)
+		pq.Array(&t.Activity), &t.Tariff, &t.TourDate, &t.Popular)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return t, nil

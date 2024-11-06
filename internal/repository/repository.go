@@ -18,7 +18,7 @@ type HelpWithTourForm interface {
 
 type Tour interface {
 	Create(tour tour.Tour) (int, error)
-	GetAll(tourPlace, tourDate, searchTitle string, quantity []int, priceMin, priceMax, duration, limit, offset int) ([]tour.Tour, int, int, int, int, []string, error)
+	GetAll(tourPlace, tourDate, searchTitle string, quantity []int, priceMin, priceMax, duration, limit, offset int, popular bool) ([]tour.Tour, int, int, int, int, []string, error)
 	GetTourByField(field, value string) (tour.Tour, error)
 	GetMinMaxPrice() (int, int, error)
 	AddPhotos(tourID int, files []*multipart.FileHeader, photoType string) error

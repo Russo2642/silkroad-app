@@ -55,23 +55,24 @@ type getAllToursResponse struct {
 	TourPlaces   []string    `json:"tourPlaces"`
 }
 
-// getAllTour Returns a list of tours with optional filters
-// @Summary Returns a list of tours
-// @Description This method returns a list of tours. You can filter by price range, tour place, tour date, quantity, duration, and search by title. Pagination is also supported via limit and offset.
+// getAllTour godoc
+// @Summary Get all tours
+// @Description Получение списка туров с возможностью фильтрации по местоположению, дате, названию, количеству, цене, продолжительности, популярности и другим параметрам
 // @Tags tours
-// @Accept  json
-// @Produce  json
-// @Param tour_place query string false "Filter by tour place"
-// @Param quantity query int false "Filter by quantity of people"
-// @Param priceMin query int false "Filter by price range (from min), example: 100"
-// @Param priceMax query int false "Filter by price range (to max), example: 500"
-// @Param duration query int false "Filter by duration of the tour"
-// @Param tour_date query string false "Filter by date of the tour, format: YYYY-MM-DDT00:00:00+00:00"
-// @Param search query string false "Search tours by title"
-// @Param limit query int false "Limit the number of returned tours"
-// @Param offset query int false "Offset for pagination"
-// @Success 200 {object} getAllToursResponse "List of tours / CurrentPage / ItemsPerPage / TotalItems / TotalPages / TourPlaces"
-// @Failure 500 {object} errorResponse "Internal Server Error"
+// @Accept json
+// @Produce json
+// @Param tour_place query string false "Tour place"
+// @Param quantity query []int false "Quantity (array of integers)"
+// @Param priceMin query int false "Minimum price"
+// @Param priceMax query int false "Maximum price"
+// @Param duration query int false "Duration"
+// @Param tour_date query string false "Tour date"
+// @Param search query string false "Search by title"
+// @Param limit query int false "Limit for pagination" default(4)
+// @Param offset query int false "Offset for pagination" default(0)
+// @Param popular query bool false "Filter by popular tours"
+// @Success 200 {object} getAllToursResponse
+// @Failure 500 {object} errorResponse
 // @Router /tours [get]
 func (h *Handler) getAllTour(c *gin.Context) {
 	tourPlace := c.Query("tour_place")
@@ -113,7 +114,10 @@ func (h *Handler) getAllTour(c *gin.Context) {
 		offset = 0
 	}
 
-	tours, currentPage, limit, totalItems, totalPages, tourPlaces, err := h.services.Tour.GetAll(tourPlace, tourDate, searchTitle, quantity, priceMin, priceMax, duration, limit, offset)
+	popularParam := c.DefaultQuery("popular", "false")
+	popular := popularParam == "true"
+
+	tours, currentPage, limit, totalItems, totalPages, tourPlaces, err := h.services.Tour.GetAll(tourPlace, tourDate, searchTitle, quantity, priceMin, priceMax, duration, limit, offset, popular)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

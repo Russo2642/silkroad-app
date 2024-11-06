@@ -41,6 +41,7 @@ type Tour struct {
 	RoutePhotos          []string         `json:"route_photos"`
 	PreviewPhoto         string           `json:"preview_photo"`
 	BookTourPhotos       string           `json:"book_tour_photos"`
+	Popular              bool             `json:"popular" db:"popular"`
 }
 
 func IsValidTourType(t TourType) bool {

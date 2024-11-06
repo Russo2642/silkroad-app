@@ -99,6 +99,8 @@ definitions:
         maximum: 5
         minimum: 1
         type: integer
+      popular:
+        type: boolean
       preview_photo:
         type: string
       price:
@@ -323,59 +325,67 @@ paths:
     get:
       consumes:
       - application/json
-      description: This method returns a list of tours. You can filter by price range,
-        tour place, tour date, quantity, duration, and search by title. Pagination
-        is also supported via limit and offset.
+      description: Получение списка туров с возможностью фильтрации по местоположению,
+        дате, названию, количеству, цене, продолжительности, популярности и другим
+        параметрам
       parameters:
-      - description: Filter by tour place
+      - description: Tour place
         in: query
         name: tour_place
         type: string
-      - description: Filter by quantity of people
+      - collectionFormat: csv
+        description: Quantity (array of integers)
         in: query
+        items:
+          type: integer
         name: quantity
-        type: integer
-      - description: 'Filter by price range (from min), example: 100'
+        type: array
+      - description: Minimum price
         in: query
         name: priceMin
         type: integer
-      - description: 'Filter by price range (to max), example: 500'
+      - description: Maximum price
         in: query
         name: priceMax
         type: integer
-      - description: Filter by duration of the tour
+      - description: Duration
         in: query
         name: duration
         type: integer
-      - description: 'Filter by date of the tour, format: YYYY-MM-DDT00:00:00+00:00'
+      - description: Tour date
         in: query
         name: tour_date
         type: string
-      - description: Search tours by title
+      - description: Search by title
         in: query
         name: search
         type: string
-      - description: Limit the number of returned tours
+      - default: 4
+        description: Limit for pagination
         in: query
         name: limit
         type: integer
-      - description: Offset for pagination
+      - default: 0
+        description: Offset for pagination
         in: query
         name: offset
         type: integer
+      - description: Filter by popular tours
+        in: query
+        name: popular
+        type: boolean
       produces:
       - application/json
       responses:
         "200":
-          description: List of tours / CurrentPage / ItemsPerPage / TotalItems / TotalPages
-            / TourPlaces
+          description: OK
           schema:
             $ref: '#/definitions/http.getAllToursResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/http.errorResponse'
-      summary: Returns a list of tours
+      summary: Get all tours
       tags:
       - tours
     post:
