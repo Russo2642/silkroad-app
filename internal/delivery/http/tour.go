@@ -60,7 +60,7 @@ type getAllToursResponse struct {
 // @Accept json
 // @Produce json
 // @Param tour_place query string false "Tour place (country)"
-// @Param quantity query []int false "Number of participants (array of integers) - filters tours that can accommodate the specified number of people"
+// @Param quantity query int false "Number of participants - filters tours that can accommodate this number of people"
 // @Param type query []string false "Tour type (array of strings)"
 // @Param difficulty query []int false "Difficulty level (array of integers from 1 to 5)"
 // @Param activities query []string false "Activities (array of strings)"
@@ -78,12 +78,10 @@ type getAllToursResponse struct {
 func (h *Handler) getAllTour(c *gin.Context) {
 	tourPlace := c.Query("tour_place")
 
-	quantityStr := c.QueryArray("quantity")
-	var quantity []int
-	for _, q := range quantityStr {
-		qInt, err := strconv.Atoi(q)
-		if err == nil {
-			quantity = append(quantity, qInt)
+	var quantity *int
+	if quantityStr := c.Query("quantity"); quantityStr != "" {
+		if val, err := strconv.Atoi(quantityStr); err == nil && val > 0 {
+			quantity = &val
 		}
 	}
 
@@ -139,14 +137,15 @@ func (h *Handler) getAllTour(c *gin.Context) {
 		offset = 0
 	}
 
-	popularParam := c.DefaultQuery("popular", "false")
 	var popular *bool
-	if popularParam == "true" {
-		val := true
-		popular = &val
-	} else if popularParam == "false" {
-		val := false
-		popular = &val
+	if popularParam := c.Query("popular"); popularParam != "" {
+		if popularParam == "true" {
+			val := true
+			popular = &val
+		} else if popularParam == "false" {
+			val := false
+			popular = &val
+		}
 	}
 
 	filter := tour.TourFilter{

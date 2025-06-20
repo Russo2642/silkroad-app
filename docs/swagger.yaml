@@ -429,14 +429,11 @@ paths:
         in: query
         name: tour_place
         type: string
-      - collectionFormat: csv
-        description: Number of participants (array of integers) - filters tours that
-          can accommodate the specified number of people
+      - description: Number of participants - filters tours that can accommodate this
+          number of people
         in: query
-        items:
-          type: integer
         name: quantity
-        type: array
+        type: integer
       - collectionFormat: csv
         description: Tour type (array of strings)
         in: query

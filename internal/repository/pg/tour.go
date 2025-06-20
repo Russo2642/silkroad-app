@@ -423,16 +423,10 @@ func (r *TourRepository) buildFilterQuery(filter tour.TourFilter, summaryOnly bo
 		argIndex++
 	}
 
-	if len(filter.Quantity) > 0 {
-		var quantityConditions []string
-		for _, q := range filter.Quantity {
-			quantityConditions = append(quantityConditions, fmt.Sprintf("(min_participants <= $%d AND max_participants >= $%d)", argIndex, argIndex+1))
-			args = append(args, q, q)
-			argIndex += 2
-		}
-		if len(quantityConditions) > 0 {
-			conditions = append(conditions, fmt.Sprintf("(%s)", strings.Join(quantityConditions, " OR ")))
-		}
+	if filter.Quantity != nil {
+		conditions = append(conditions, fmt.Sprintf("min_participants <= $%d AND max_participants >= $%d", argIndex, argIndex+1))
+		args = append(args, *filter.Quantity, *filter.Quantity)
+		argIndex += 2
 	}
 
 	if len(filter.Activities) > 0 {

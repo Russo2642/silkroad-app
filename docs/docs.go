@@ -358,12 +358,8 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "array",
-                        "items": {
-                            "type": "integer"
-                        },
-                        "collectionFormat": "csv",
-                        "description": "Number of participants (array of integers) - filters tours that can accommodate the specified number of people",
+                        "type": "integer",
+                        "description": "Number of participants - filters tours that can accommodate this number of people",
                         "name": "quantity",
                         "in": "query"
                     },

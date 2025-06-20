@@ -179,7 +179,7 @@ type TourFilter struct {
 	Difficulty  []Difficulty   `json:"difficulty" form:"difficulty"`
 	PriceMin    *int           `json:"price_min" form:"price_min"`
 	PriceMax    *int           `json:"price_max" form:"price_max"`
-	Quantity    []int          `json:"quantity" form:"quantity"`
+	Quantity    *int           `json:"quantity" form:"quantity"`
 	Activities  pq.StringArray `json:"activities" form:"activities"`
 	Categories  pq.StringArray `json:"categories" form:"categories"`
 	Season      pq.StringArray `json:"season" form:"season"`
