@@ -16,3 +16,7 @@ func NewHelpWithTourFormService(repo repository.HelpWithTourForm) *HelpWithTourF
 func (s *HelpWithTourFormService) Create(helpWithTourForm forms.HelpWithTourForm) (int, error) {
 	return s.repo.Create(helpWithTourForm)
 }
+
+func (s *HelpWithTourFormService) GetByID(id int) (forms.HelpWithTourForm, error) {
+	return s.repo.GetByID(id)
+}

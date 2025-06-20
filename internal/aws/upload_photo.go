@@ -4,13 +4,18 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"io"
 	"mime/multipart"
 	"net/http"
-	"os"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
+
+// GetBucketName возвращает имя bucket'а из конфигурации
+func GetBucketName() string {
+	return bucketName
+}
 
 func processFile(file multipart.File) (*bytes.Buffer, error) {
 	buf := new(bytes.Buffer)
@@ -42,7 +47,7 @@ func UploadPhotoToS3(bucketName, key string, file multipart.File) (string, error
 		return "", fmt.Errorf("uploadPhotoToS3: failed to upload object: %v", err)
 	}
 
-	url := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", bucketName, os.Getenv("AWS_REGION"), key)
+	url := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", bucketName, awsRegion, key)
 
 	return url, nil
 }

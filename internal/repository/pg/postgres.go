@@ -2,6 +2,7 @@ package pg
 
 import (
 	"fmt"
+
 	"github.com/jmoiron/sqlx"
 )
 

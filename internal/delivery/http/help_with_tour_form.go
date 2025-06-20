@@ -2,15 +2,15 @@ package http
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"silkroad/m/internal/domain/forms"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
-// createHelpWithTourForm Creates a helpWithTour form
 // @Summary Create a help with tour form
-// @Description This method creates a new helpWithTour form
+// @Description This method creates a new helpWithTour form with name, phone, country and when_date
 // @Tags forms
 // @Accept  json
 // @Produce  json
@@ -33,8 +33,8 @@ func (h *Handler) createHelpWithTourForm(c *gin.Context) {
 	}
 
 	message := fmt.Sprintf(
-		"ФОРМА С ПОМОЩЬЮ ВЫБОРА ТУРА\n*ID формы*: %d\n*Имя*: %s\n*Телефон*: %s\n*Место*: %s\n*Дата поездки*: %s",
-		id, input.Name, input.Phone, input.Place, input.WhenDate,
+		"ФОРМА ПОМОЩИ С ВЫБОРОМ ТУРА\n*ID формы*: %d\n*Имя*: %s\n*Телефон*: %s\n*Где будем отдыхать*: %s\n*Когда*: %s",
+		id, input.Name, input.Phone, input.Country, input.WhenDate.Format("02.01.2006"),
 	)
 
 	err = h.telegramClient.SendTelegramMessage(message)
@@ -47,5 +47,4 @@ func (h *Handler) createHelpWithTourForm(c *gin.Context) {
 		"status":  http.StatusCreated,
 		"message": "Created",
 	})
-
 }

@@ -1,10 +1,11 @@
 package http
 
 import (
-	"github.com/gin-gonic/gin"
 	_ "silkroad/m/docs"
 	"silkroad/m/internal/service"
 	"silkroad/m/internal/telegram"
+
+	"github.com/gin-gonic/gin"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -44,15 +45,18 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		{
 			tour.POST("/", h.createTour)
 			tour.GET("/", h.getAllTour)
+			tour.GET("/prices", h.getMinMaxPrice)
 			tour.GET("/:id", h.getTourById)
 			tour.GET("/title/:slug", h.getTourBySlug)
-			tour.GET("/prices", h.getMinMaxPrice)
-			tour.POST("/photos/:tourID", h.uploadTourPhotos)
+			tour.POST("/:id/photos/upload", h.uploadTourPhotosNew)
+			tour.GET("/:id/photos", h.getTourPhotos)
 		}
 
-		tourEditor := api.Group("/tour_editor")
+		photos := api.Group("/photos")
 		{
-			tourEditor.POST("/", h.createTourEditor)
+			photos.GET("/", h.getPhotosByFilter)
+			photos.PUT("/:photoID", h.updateTourPhoto)
+			photos.DELETE("/:photoID", h.deleteTourPhoto)
 		}
 	}
 

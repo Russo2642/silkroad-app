@@ -16,3 +16,7 @@ func NewContactFormService(repo repository.ContactForm) *ContactFormService {
 func (s *ContactFormService) Create(contactForm forms.ContactForm) (int, error) {
 	return s.repo.Create(contactForm)
 }
+
+func (s *ContactFormService) GetByID(id int) (forms.ContactForm, error) {
+	return s.repo.GetByID(id)
+}

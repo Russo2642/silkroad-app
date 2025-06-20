@@ -1,13 +1,13 @@
 package http
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"silkroad/m/internal/domain/tour"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
-// createTour creates a new tour
 // @Summary Creates a new tour
 // @Description This method creates a new tour with the given input data
 // @Tags tours
@@ -26,7 +26,7 @@ func (h *Handler) createTour(c *gin.Context) {
 		return
 	}
 
-	if !tour.IsValidTourType(input.TourType) {
+	if !tour.IsValidTourType(input.Type) {
 		newErrorResponse(c, http.StatusUnprocessableEntity, "Invalid Tour Type. Please choose the correct name: "+
 			"Однодневный тур / Многодневный тур / Сити-тур / Эксклюзивный тур / Инфо-тур / Авторский тур")
 		return
@@ -55,19 +55,20 @@ type getAllToursResponse struct {
 	TourPlaces   []string    `json:"tourPlaces"`
 }
 
-// getAllTour godoc
-// @Summary Get all tours
-// @Description Получение списка туров с возможностью фильтрации по местоположению, дате, названию, количеству, цене, продолжительности, популярности и другим параметрам
+// @Description Получение списка туров с возможностью фильтрации по местоположению, количеству участников, цене, продолжительности, популярности и другим параметрам
 // @Tags tours
 // @Accept json
 // @Produce json
-// @Param tour_place query string false "Tour place"
-// @Param quantity query []int false "Quantity (array of integers)"
+// @Param tour_place query string false "Tour place (country)"
+// @Param quantity query []int false "Number of participants (array of integers) - filters tours that can accommodate the specified number of people"
+// @Param type query []string false "Tour type (array of strings)"
+// @Param difficulty query []int false "Difficulty level (array of integers from 1 to 5)"
+// @Param activities query []string false "Activities (array of strings)"
+// @Param categories query []string false "Categories (array of strings)"
 // @Param priceMin query int false "Minimum price"
 // @Param priceMax query int false "Maximum price"
-// @Param duration query int false "Duration"
-// @Param tour_date query string false "Tour date"
-// @Param search query string false "Search by title"
+// @Param duration query int false "Duration in days"
+// @Param search query string false "Search by title and description"
 // @Param limit query int false "Limit for pagination" default(4)
 // @Param offset query int false "Offset for pagination" default(0)
 // @Param popular query bool false "Filter by popular tours"
@@ -86,42 +87,95 @@ func (h *Handler) getAllTour(c *gin.Context) {
 		}
 	}
 
-	priceMin, err := strconv.Atoi(c.Query("priceMin"))
-	if err == nil {
-		priceMin = 0
+	var priceMin, priceMax *int
+	if priceMinStr := c.Query("priceMin"); priceMinStr != "" {
+		if val, err := strconv.Atoi(priceMinStr); err == nil && val > 0 {
+			priceMin = &val
+		}
+	}
+	if priceMaxStr := c.Query("priceMax"); priceMaxStr != "" {
+		if val, err := strconv.Atoi(priceMaxStr); err == nil && val > 0 {
+			priceMax = &val
+		}
 	}
 
-	priceMax, err := strconv.Atoi(c.Query("priceMax"))
-	if err == nil {
-		priceMax = 0
+	var durationFilter *tour.RangeFilter
+	if durationStr := c.Query("duration"); durationStr != "" {
+		if duration, err := strconv.Atoi(durationStr); err == nil && duration > 0 {
+			durationFilter = &tour.RangeFilter{Min: &duration, Max: &duration}
+		}
 	}
 
-	duration, err := strconv.Atoi(c.Query("duration"))
-	if err != nil {
-		duration = 0
+	tourTypes := c.QueryArray("type")
+	var types []tour.TourType
+	for _, t := range tourTypes {
+		if tour.IsValidTourType(tour.TourType(t)) {
+			types = append(types, tour.TourType(t))
+		}
 	}
 
-	tourDate := c.Query("tour_date")
+	difficultyStr := c.QueryArray("difficulty")
+	var difficulties []tour.Difficulty
+	for _, d := range difficultyStr {
+		if diffInt, err := strconv.Atoi(d); err == nil {
+			if tour.IsValidDifficulty(tour.Difficulty(diffInt)) {
+				difficulties = append(difficulties, tour.Difficulty(diffInt))
+			}
+		}
+	}
+
+	activities := c.QueryArray("activities")
+	categories := c.QueryArray("categories")
+
 	searchTitle := c.Query("search")
 
 	limit, err := strconv.Atoi(c.Query("limit"))
-	if err != nil {
+	if err != nil || limit <= 0 {
 		limit = 4
 	}
 
 	offset, err := strconv.Atoi(c.Query("offset"))
-	if err != nil {
+	if err != nil || offset < 0 {
 		offset = 0
 	}
 
 	popularParam := c.DefaultQuery("popular", "false")
-	popular := popularParam == "true"
+	var popular *bool
+	if popularParam == "true" {
+		val := true
+		popular = &val
+	} else if popularParam == "false" {
+		val := false
+		popular = &val
+	}
 
-	tours, currentPage, limit, totalItems, totalPages, tourPlaces, err := h.services.Tour.GetAll(tourPlace, tourDate, searchTitle, quantity, priceMin, priceMax, duration, limit, offset, popular)
+	filter := tour.TourFilter{
+		SearchQuery: searchTitle,
+		Limit:       limit,
+		Offset:      offset,
+		PriceMin:    priceMin,
+		PriceMax:    priceMax,
+		Duration:    durationFilter,
+		Popular:     popular,
+		Quantity:    quantity,
+		Type:        types,
+		Difficulty:  difficulties,
+		Activities:  activities,
+		Categories:  categories,
+	}
+
+	if tourPlace != "" {
+		filter.Country = []string{tourPlace}
+	}
+
+	tours, totalItems, err := h.services.Tour.GetAll(filter)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	currentPage := (offset / limit) + 1
+	totalPages := (totalItems + limit - 1) / limit
 
 	c.JSON(http.StatusOK, getAllToursResponse{
 		Tours:        tours,
@@ -129,11 +183,10 @@ func (h *Handler) getAllTour(c *gin.Context) {
 		ItemsPerPage: limit,
 		TotalItems:   totalItems,
 		TotalPages:   totalPages,
-		TourPlaces:   tourPlaces,
+		TourPlaces:   []string{}, // TODO: implement if needed
 	})
 }
 
-// getTour Returns tour by ID
 // @Summary Returns tour by ID
 // @Description This method returns the details of a specific tour by its ID
 // @Tags tours
@@ -150,7 +203,7 @@ func (h *Handler) getTourById(c *gin.Context) {
 		return
 	}
 
-	_tour, err := h.services.Tour.GetById(id)
+	_tour, err := h.services.Tour.GetByID(id)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -159,7 +212,6 @@ func (h *Handler) getTourById(c *gin.Context) {
 	c.JSON(http.StatusOK, _tour)
 }
 
-// getTourBySlug Returns tour by slug
 // @Summary Returns tour details by slug
 // @Description This method returns the details of a specific tour based on its slug
 // @Tags tours
@@ -179,7 +231,6 @@ func (h *Handler) getTourBySlug(c *gin.Context) {
 	c.JSON(http.StatusOK, _tour)
 }
 
-// getMinMaxPrice Returns the minimum and maximum tour prices
 // @Summary Returns the minimum and maximum prices of all tours
 // @Description This method returns the minimum and maximum prices of all available tours
 // @Tags tours

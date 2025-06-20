@@ -2,40 +2,52 @@ basePath: /api
 definitions:
   forms.ContactForm:
     properties:
-      description:
+      created_at:
         type: string
       email:
+        maxLength: 100
         type: string
       id:
         type: integer
       name:
+        maxLength: 100
+        minLength: 2
         type: string
       phone:
+        maxLength: 20
+        minLength: 10
         type: string
       tour_id:
         type: integer
     required:
-    - description
     - email
     - name
     - phone
     type: object
   forms.HelpWithTourForm:
     properties:
+      country:
+        maxLength: 100
+        minLength: 2
+        type: string
+      created_at:
+        type: string
       id:
         type: integer
       name:
+        maxLength: 100
+        minLength: 2
         type: string
       phone:
-        type: string
-      place:
+        maxLength: 20
+        minLength: 10
         type: string
       when_date:
         type: string
     required:
+    - country
     - name
     - phone
-    - place
     - when_date
     type: object
   http.errorResponse:
@@ -62,112 +74,109 @@ definitions:
           $ref: '#/definitions/tour.Tour'
         type: array
     type: object
-  tour.DescriptionRoute:
-    properties:
-      default:
-        items:
-          type: string
-        type: array
-      next:
-        items:
-          type: string
-        type: array
-    type: object
+  tour.Difficulty:
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    type: integer
+    x-enum-varnames:
+    - DifficultyEasy
+    - DifficultyModerate
+    - DifficultyHard
+    - DifficultyVeryHard
+    - DifficultyExtreme
   tour.Tour:
+    type: object
+  tour.TourPhoto:
     properties:
-      activity:
-        items:
-          type: string
-        type: array
-      book_tour_photos:
+      alt_text:
         type: string
-      currency:
+      created_at:
         type: string
-      description_excursion:
+      description:
         type: string
-      description_route:
-        $ref: '#/definitions/tour.DescriptionRoute'
-      duration:
+      display_order:
         type: integer
-      gallery_photos:
-        items:
-          type: string
-        type: array
       id:
         type: integer
-      physical_rating:
-        maximum: 5
-        minimum: 1
-        type: integer
-      popular:
+      is_active:
         type: boolean
-      preview_photo:
-        type: string
-      price:
-        type: integer
-      quantity:
-        type: integer
-      route_photos:
-        items:
-          type: string
-        type: array
-      season:
-        type: string
-      slug:
-        type: string
-      tariff:
+      photo_type:
+        $ref: '#/definitions/tour.TourPhotoType'
+      photo_url:
         type: string
       title:
         type: string
-      tour_date:
-        type: string
-      tour_place:
-        type: string
-      tour_type:
-        $ref: '#/definitions/tour.TourType'
-    required:
-    - activity
-    - currency
-    - description_excursion
-    - description_route
-    - duration
-    - physical_rating
-    - price
-    - quantity
-    - season
-    - title
-    - tour_date
-    - tour_place
-    - tour_type
-    type: object
-  tour.TourEditor:
-    properties:
-      activity:
-        items:
-          type: string
-        type: array
-      email:
-        type: string
-      id:
+      tour_id:
         type: integer
-      location:
-        items:
-          type: string
-        type: array
-      name:
-        type: string
-      phone:
-        type: string
-      tour_date:
+      updated_at:
         type: string
     required:
-    - activity
-    - email
-    - location
-    - name
-    - phone
-    - tour_date
+    - photo_type
+    - photo_url
     type: object
+  tour.TourPhotoInput:
+    properties:
+      alt_text:
+        type: string
+      description:
+        type: string
+      display_order:
+        type: integer
+      photo_type:
+        $ref: '#/definitions/tour.TourPhotoType'
+      title:
+        type: string
+      tour_id:
+        type: integer
+    required:
+    - photo_type
+    - tour_id
+    type: object
+  tour.TourPhotoType:
+    enum:
+    - preview
+    - gallery
+    - route
+    - booking
+    type: string
+    x-enum-varnames:
+    - PhotoTypePreview
+    - PhotoTypeGallery
+    - PhotoTypeRoute
+    - PhotoTypeBooking
+  tour.TourPhotosGrouped:
+    properties:
+      booking:
+        items:
+          $ref: '#/definitions/tour.TourPhoto'
+        type: array
+      gallery:
+        items:
+          $ref: '#/definitions/tour.TourPhoto'
+        type: array
+      preview:
+        items:
+          $ref: '#/definitions/tour.TourPhoto'
+        type: array
+      route:
+        items:
+          $ref: '#/definitions/tour.TourPhoto'
+        type: array
+    type: object
+  tour.TourStatus:
+    enum:
+    - active
+    - inactive
+    - archived
+    type: string
+    x-enum-varnames:
+    - StatusActive
+    - StatusInactive
+    - StatusArchived
   tour.TourType:
     enum:
     - Однодневный тур
@@ -184,7 +193,6 @@ definitions:
     - ExclusiveTour
     - InfoTour
     - AuthorsTour
-host: 178.128.123.250:80
 info:
   contact: {}
   title: SilkRoad App API
@@ -194,36 +202,33 @@ paths:
     get:
       consumes:
       - application/json
-      description: This method returns a list of all available countries
+      description: Get list of countries with optional filtering
+      parameters:
+      - description: Filter by active status
+        in: query
+        name: is_active
+        type: boolean
       produces:
       - application/json
       responses:
         "200":
-          description: List of countries
+          description: OK
           schema:
             additionalProperties: true
             type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/http.errorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/http.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/http.errorResponse'
-      summary: Returns a list of countries
+      summary: Get countries
       tags:
       - countries
   /form/contact_form:
     post:
       consumes:
       - application/json
-      description: This method creates a new contact form and, if TourID is provided,
-        sends tour details
+      description: This method creates a new contact form and sends tour title if
+        TourID is provided
       parameters:
       - description: Contact form data
         in: body
@@ -258,7 +263,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: This method creates a new helpWithTour form
+      description: This method creates a new helpWithTour form with name, phone, country
+        and when_date
       parameters:
       - description: helpWithTour form data
         in: body
@@ -289,38 +295,129 @@ paths:
       summary: Create a help with tour form
       tags:
       - forms
-  /tour_editor:
-    post:
+  /photos:
+    get:
       consumes:
       - application/json
-      description: This method allows users to create a custom tour by submitting
-        their details and tour preferences. The tour data will also be sent to Telegram.
+      description: Get photos with filtering and pagination
       parameters:
-      - description: Custom tour data
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/tour.TourEditor'
+      - description: Tour ID
+        in: query
+        name: tour_id
+        type: integer
+      - description: Photo type
+        enum:
+        - preview
+        - gallery
+        - route
+        - booking
+        in: query
+        name: photo_type
+        type: string
+      - description: Is active
+        in: query
+        name: is_active
+        type: boolean
+      - default: 50
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: ID and creation status of the tour
+          description: 'photos: array of photos, total: total count'
           schema:
             additionalProperties: true
             type: object
         "400":
-          description: Bad request
+          description: 'status: Bad Request, message: Invalid parameters'
           schema:
-            $ref: '#/definitions/http.errorResponse'
+            additionalProperties: true
+            type: object
         "500":
-          description: Internal server error
+          description: 'status: Internal Server Error, message: Error message'
           schema:
-            $ref: '#/definitions/http.errorResponse'
-      summary: Create a custom tour
+            additionalProperties: true
+            type: object
+      summary: Get photos by filter
       tags:
-      - tour
+      - photos
+  /photos/{photoID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete photo (soft delete)
+      parameters:
+      - description: Photo ID
+        in: path
+        name: photoID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success, message: Photo deleted successfully'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 'status: Bad Request, message: Invalid photoID'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 'status: Internal Server Error, message: Error message'
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete tour photo
+      tags:
+      - photos
+    put:
+      consumes:
+      - application/json
+      description: Update photo metadata
+      parameters:
+      - description: Photo ID
+        in: path
+        name: photoID
+        required: true
+        type: integer
+      - description: Photo update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/tour.TourPhotoInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success, message: Photo updated successfully'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 'status: Bad Request, message: Invalid parameters'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 'status: Internal Server Error, message: Error message'
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update tour photo
+      tags:
+      - photos
   /tours:
     get:
       consumes:
@@ -447,20 +544,56 @@ paths:
       summary: Returns tour by ID
       tags:
       - tours
-  /tours/photos/{tourID}:
-    post:
+  /tours/{id}/photos:
+    get:
       consumes:
-      - multipart/form-data
-      description: Uploads multiple photos for a specific tour by tourID, allowing
-        the update of either the gallery or the route description.
+      - application/json
+      description: Get all photos for a specific tour grouped by type
       parameters:
       - description: Tour ID
         in: path
-        name: tourID
+        name: id
         required: true
         type: integer
-      - description: Type to update (gallery, route, preview, book)
-        in: query
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tour photos
+          schema:
+            $ref: '#/definitions/tour.TourPhotosGrouped'
+        "400":
+          description: 'status: Bad Request, message: Invalid tourID'
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 'status: Not Found, message: Tour not found'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 'status: Internal Server Error, message: Error message'
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get photos for a tour
+      tags:
+      - tours
+  /tours/{id}/photos/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads multiple photos for a specific tour by tourID with advanced
+        metadata support
+      parameters:
+      - description: Tour ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Type of photo (preview, gallery, route, booking)
+        in: formData
         name: photoType
         required: true
         type: string
@@ -469,6 +602,22 @@ paths:
         name: photos
         required: true
         type: file
+      - description: Photo title
+        in: formData
+        name: title
+        type: string
+      - description: Photo description
+        in: formData
+        name: description
+        type: string
+      - description: Photo alt text
+        in: formData
+        name: alt_text
+        type: string
+      - description: Display order
+        in: formData
+        name: display_order
+        type: integer
       produces:
       - application/json
       responses:
@@ -478,8 +627,7 @@ paths:
             additionalProperties: true
             type: object
         "400":
-          description: 'status: Bad Request, message: Invalid tourID, updateField
-            or form data'
+          description: 'status: Bad Request, message: Invalid parameters'
           schema:
             additionalProperties: true
             type: object
@@ -488,7 +636,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Upload photos for a tour
+      summary: Upload photos for a tour (new version)
       tags:
       - tours
   /tours/prices:

@@ -2,11 +2,13 @@ package telegram
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+
+	"silkroad/m/internal/config"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
-	"log"
-	"os"
-	"strconv"
 )
 
 type Client struct {
@@ -14,14 +16,18 @@ type Client struct {
 	chatID int64
 }
 
-func NewTelegramClient() *Client {
-	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_BOT_TOKEN"))
+func NewTelegramClient(cfg config.TelegramConfig) *Client {
+	if cfg.BotToken == "" {
+		logrus.Warn("Telegram bot token is empty, Telegram notifications will not work")
+		return &Client{}
+	}
+
+	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	chatIDStr := os.Getenv("TELEGRAM_CHAT_ID")
-	chatID, err := strconv.ParseInt(chatIDStr, 10, 64)
+	chatID, err := strconv.ParseInt(cfg.ChatID, 10, 64)
 	if err != nil {
 		logrus.Errorf("Error converting TELEGRAM_CHAT_ID: %v", err)
 	}
@@ -33,6 +39,11 @@ func NewTelegramClient() *Client {
 }
 
 func (c *Client) SendTelegramMessage(message string) error {
+	if c.bot == nil {
+		logrus.Warn("Telegram bot is not configured, skipping message send")
+		return nil
+	}
+
 	msg := tgbotapi.NewMessage(c.chatID, message)
 	msg.ParseMode = "Markdown"
 	_, err := c.bot.Send(msg)

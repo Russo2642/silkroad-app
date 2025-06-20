@@ -1,10 +1,14 @@
 package forms
 
+import (
+	"time"
+)
+
 type ContactForm struct {
-	Id          int    `json:"id" db:"id"`
-	Name        string `json:"name" db:"name" binding:"required"`
-	Phone       string `json:"phone" db:"phone" binding:"required"`
-	Email       string `json:"email" db:"email" binding:"required"`
-	Description string `json:"description" db:"description" binding:"required"`
-	TourID      *int   `json:"tour_id" db:"tour_id"`
+	ID        int       `json:"id" db:"id"`
+	Name      string    `json:"name" db:"name" binding:"required,min=2,max=100"`
+	Phone     string    `json:"phone" db:"phone" binding:"required,min=10,max=20"`
+	Email     string    `json:"email" db:"email" binding:"required,email,max=100"`
+	TourID    *int      `json:"tour_id" db:"tour_id"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }

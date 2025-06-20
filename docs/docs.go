@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/countries": {
             "get": {
-                "description": "This method returns a list of all available countries",
+                "description": "Get list of countries with optional filtering",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,25 +27,21 @@ const docTemplate = `{
                 "tags": [
                     "countries"
                 ],
-                "summary": "Returns a list of countries",
+                "summary": "Get countries",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Filter by active status",
+                        "name": "is_active",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "List of countries",
+                        "description": "OK",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
                         }
                     },
                     "500": {
@@ -59,7 +55,7 @@ const docTemplate = `{
         },
         "/form/contact_form": {
             "post": {
-                "description": "This method creates a new contact form and, if TourID is provided, sends tour details",
+                "description": "This method creates a new contact form and sends tour title if TourID is provided",
                 "consumes": [
                     "application/json"
                 ],
@@ -112,7 +108,7 @@ const docTemplate = `{
         },
         "/form/help_with_tour_form": {
             "post": {
-                "description": "This method creates a new helpWithTour form",
+                "description": "This method creates a new helpWithTour form with name, phone, country and when_date",
                 "consumes": [
                     "application/json"
                 ],
@@ -163,9 +159,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/tour_editor": {
-            "post": {
-                "description": "This method allows users to create a custom tour by submitting their details and tour preferences. The tour data will also be sent to Telegram.",
+        "/photos": {
+            "get": {
+                "description": "Get photos with filtering and pagination",
                 "consumes": [
                     "application/json"
                 ],
@@ -173,38 +169,170 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tour"
+                    "photos"
                 ],
-                "summary": "Create a custom tour",
+                "summary": "Get photos by filter",
                 "parameters": [
                     {
-                        "description": "Custom tour data",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/tour.TourEditor"
-                        }
+                        "type": "integer",
+                        "description": "Tour ID",
+                        "name": "tour_id",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "preview",
+                            "gallery",
+                            "route",
+                            "booking"
+                        ],
+                        "type": "string",
+                        "description": "Photo type",
+                        "name": "photo_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Is active",
+                        "name": "is_active",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "ID and creation status of the tour",
+                        "description": "photos: array of photos, total: total count",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "Bad request",
+                        "description": "status: Bad Request, message: Invalid parameters",
                         "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "status: Internal Server Error, message: Error message",
                         "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/photos/{photoID}": {
+            "put": {
+                "description": "Update photo metadata",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "photos"
+                ],
+                "summary": "Update tour photo",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Photo ID",
+                        "name": "photoID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Photo update data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/tour.TourPhotoInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: success, message: Photo updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "status: Bad Request, message: Invalid parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "status: Internal Server Error, message: Error message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete photo (soft delete)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "photos"
+                ],
+                "summary": "Delete tour photo",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Photo ID",
+                        "name": "photoID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: success, message: Photo deleted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "status: Bad Request, message: Invalid photoID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "status: Internal Server Error, message: Error message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -358,67 +486,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/tours/photos/{tourID}": {
-            "post": {
-                "description": "Uploads multiple photos for a specific tour by tourID, allowing the update of either the gallery or the route description.",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tours"
-                ],
-                "summary": "Upload photos for a tour",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Tour ID",
-                        "name": "tourID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Type to update (gallery, route, preview, book)",
-                        "name": "photoType",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "Photos to upload",
-                        "name": "photos",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "status: OK, message: Photos uploaded successfully",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "status: Bad Request, message: Invalid tourID, updateField or form data",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "status: Internal Server Error, message: Error message",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/tours/prices": {
             "get": {
                 "description": "This method returns the minimum and maximum prices of all available tours",
@@ -524,32 +591,174 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/tours/{id}/photos": {
+            "get": {
+                "description": "Get all photos for a specific tour grouped by type",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tours"
+                ],
+                "summary": "Get photos for a tour",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tour ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tour photos",
+                        "schema": {
+                            "$ref": "#/definitions/tour.TourPhotosGrouped"
+                        }
+                    },
+                    "400": {
+                        "description": "status: Bad Request, message: Invalid tourID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "status: Not Found, message: Tour not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "status: Internal Server Error, message: Error message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/tours/{id}/photos/upload": {
+            "post": {
+                "description": "Uploads multiple photos for a specific tour by tourID with advanced metadata support",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tours"
+                ],
+                "summary": "Upload photos for a tour (new version)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tour ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Type of photo (preview, gallery, route, booking)",
+                        "name": "photoType",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Photos to upload",
+                        "name": "photos",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Photo title",
+                        "name": "title",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Photo description",
+                        "name": "description",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Photo alt text",
+                        "name": "alt_text",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Display order",
+                        "name": "display_order",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: OK, message: Photos uploaded successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "status: Bad Request, message: Invalid parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "status: Internal Server Error, message: Error message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "forms.ContactForm": {
             "type": "object",
             "required": [
-                "description",
                 "email",
                 "name",
                 "phone"
             ],
             "properties": {
-                "description": {
+                "created_at": {
                     "type": "string"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 100
                 },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
                 },
                 "phone": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 10
                 },
                 "tour_id": {
                     "type": "integer"
@@ -559,23 +768,32 @@ const docTemplate = `{
         "forms.HelpWithTourForm": {
             "type": "object",
             "required": [
+                "country",
                 "name",
                 "phone",
-                "place",
                 "when_date"
             ],
             "properties": {
+                "country": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
+                },
+                "created_at": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
                 },
                 "phone": {
-                    "type": "string"
-                },
-                "place": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 10
                 },
                 "when_date": {
                     "type": "string"
@@ -619,156 +837,151 @@ const docTemplate = `{
                 }
             }
         },
-        "tour.DescriptionRoute": {
-            "type": "object",
-            "properties": {
-                "default": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "next": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
+        "tour.Difficulty": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "x-enum-varnames": [
+                "DifficultyEasy",
+                "DifficultyModerate",
+                "DifficultyHard",
+                "DifficultyVeryHard",
+                "DifficultyExtreme"
+            ]
         },
         "tour.Tour": {
+            "type": "object"
+        },
+        "tour.TourPhoto": {
             "type": "object",
             "required": [
-                "activity",
-                "currency",
-                "description_excursion",
-                "description_route",
-                "duration",
-                "physical_rating",
-                "price",
-                "quantity",
-                "season",
-                "title",
-                "tour_date",
-                "tour_place",
-                "tour_type"
+                "photo_type",
+                "photo_url"
             ],
             "properties": {
-                "activity": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "book_tour_photos": {
+                "alt_text": {
                     "type": "string"
                 },
-                "currency": {
+                "created_at": {
                     "type": "string"
                 },
-                "description_excursion": {
+                "description": {
                     "type": "string"
                 },
-                "description_route": {
-                    "$ref": "#/definitions/tour.DescriptionRoute"
-                },
-                "duration": {
+                "display_order": {
                     "type": "integer"
-                },
-                "gallery_photos": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 },
                 "id": {
                     "type": "integer"
                 },
-                "physical_rating": {
-                    "type": "integer",
-                    "maximum": 5,
-                    "minimum": 1
-                },
-                "popular": {
+                "is_active": {
                     "type": "boolean"
                 },
-                "preview_photo": {
-                    "type": "string"
+                "photo_type": {
+                    "$ref": "#/definitions/tour.TourPhotoType"
                 },
-                "price": {
-                    "type": "integer"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "route_photos": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "season": {
-                    "type": "string"
-                },
-                "slug": {
-                    "type": "string"
-                },
-                "tariff": {
+                "photo_url": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
                 },
-                "tour_date": {
-                    "type": "string"
+                "tour_id": {
+                    "type": "integer"
                 },
-                "tour_place": {
+                "updated_at": {
                     "type": "string"
-                },
-                "tour_type": {
-                    "$ref": "#/definitions/tour.TourType"
                 }
             }
         },
-        "tour.TourEditor": {
+        "tour.TourPhotoInput": {
             "type": "object",
             "required": [
-                "activity",
-                "email",
-                "location",
-                "name",
-                "phone",
-                "tour_date"
+                "photo_type",
+                "tour_id"
             ],
             "properties": {
-                "activity": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "email": {
+                "alt_text": {
                     "type": "string"
                 },
-                "id": {
+                "description": {
+                    "type": "string"
+                },
+                "display_order": {
                     "type": "integer"
                 },
-                "location": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "photo_type": {
+                    "$ref": "#/definitions/tour.TourPhotoType"
                 },
-                "name": {
+                "title": {
                     "type": "string"
                 },
-                "phone": {
-                    "type": "string"
-                },
-                "tour_date": {
-                    "type": "string"
+                "tour_id": {
+                    "type": "integer"
                 }
             }
+        },
+        "tour.TourPhotoType": {
+            "type": "string",
+            "enum": [
+                "preview",
+                "gallery",
+                "route",
+                "booking"
+            ],
+            "x-enum-varnames": [
+                "PhotoTypePreview",
+                "PhotoTypeGallery",
+                "PhotoTypeRoute",
+                "PhotoTypeBooking"
+            ]
+        },
+        "tour.TourPhotosGrouped": {
+            "type": "object",
+            "properties": {
+                "booking": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/tour.TourPhoto"
+                    }
+                },
+                "gallery": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/tour.TourPhoto"
+                    }
+                },
+                "preview": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/tour.TourPhoto"
+                    }
+                },
+                "route": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/tour.TourPhoto"
+                    }
+                }
+            }
+        },
+        "tour.TourStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "inactive",
+                "archived"
+            ],
+            "x-enum-varnames": [
+                "StatusActive",
+                "StatusInactive",
+                "StatusArchived"
+            ]
         },
         "tour.TourType": {
             "type": "string",
@@ -795,7 +1008,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "178.128.123.250:80",
+	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "SilkRoad App API",

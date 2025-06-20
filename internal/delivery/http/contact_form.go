@@ -2,15 +2,15 @@ package http
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"silkroad/m/internal/domain/forms"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
-// createContactForm Creates a contact form
 // @Summary Create a contact form
-// @Description This method creates a new contact form and, if TourID is provided, sends tour details
+// @Description This method creates a new contact form and sends tour title if TourID is provided
 // @Tags forms
 // @Accept  json
 // @Produce  json
@@ -33,21 +33,18 @@ func (h *Handler) createContactForm(c *gin.Context) {
 	}
 
 	message := fmt.Sprintf(
-		"ФОРМА ОБРАТНОЙ СВЯЗИ\n*ID формы*: %d\n*Имя*: %s\n*Телефон*: %s\n*Электронная почта*: %s\n*Текст*: %s",
-		id, input.Name, input.Phone, input.Email, input.Description,
+		"ФОРМА ОБРАТНОЙ СВЯЗИ\n*ID формы*: %d\n*Имя*: %s\n*Телефон*: %s\n*Электронная почта*: %s",
+		id, input.Name, input.Phone, input.Email,
 	)
 
 	if input.TourID != nil {
-		tour, err := h.services.Tour.GetById(*input.TourID)
+		tour, err := h.services.Tour.GetByID(*input.TourID)
 		if err != nil {
 			newErrorResponse(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		tourInfo := fmt.Sprintf(
-			"\n\n*ID тура*: %d\n*Тип тура*: %s\n*Название тура*: %s\n*Место тура*: %s\n*Дата тура*: %s"+
-				"\n*Количество человек*: %d\n*Активности*: %s\n*Тариф*: %s",
-			*input.TourID, tour.TourType, tour.Title, tour.TourPlace, tour.TourDate.Format("02-01-2006"), tour.Quantity, tour.Activity, tour.Tariff)
+		tourInfo := fmt.Sprintf("\n*Тур*: %s", tour.Title)
 		message += tourInfo
 	}
 
@@ -61,5 +58,4 @@ func (h *Handler) createContactForm(c *gin.Context) {
 		"status":  http.StatusCreated,
 		"message": "Created",
 	})
-
 }
