@@ -340,7 +340,7 @@ const docTemplate = `{
         },
         "/tours": {
             "get": {
-                "description": "Получение списка туров с возможностью фильтрации по местоположению, дате, названию, количеству, цене, продолжительности, популярности и другим параметрам",
+                "description": "Получение списка туров с возможностью фильтрации по местоположению, количеству участников, цене, продолжительности, популярности и другим параметрам",
                 "consumes": [
                     "application/json"
                 ],
@@ -350,11 +350,10 @@ const docTemplate = `{
                 "tags": [
                     "tours"
                 ],
-                "summary": "Get all tours",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Tour place",
+                        "description": "Tour place (country)",
                         "name": "tour_place",
                         "in": "query"
                     },
@@ -364,8 +363,48 @@ const docTemplate = `{
                             "type": "integer"
                         },
                         "collectionFormat": "csv",
-                        "description": "Quantity (array of integers)",
+                        "description": "Number of participants (array of integers) - filters tours that can accommodate the specified number of people",
                         "name": "quantity",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Tour type (array of strings)",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Difficulty level (array of integers from 1 to 5)",
+                        "name": "difficulty",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Activities (array of strings)",
+                        "name": "activities",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Categories (array of strings)",
+                        "name": "categories",
                         "in": "query"
                     },
                     {
@@ -382,19 +421,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "Duration",
+                        "description": "Duration in days",
                         "name": "duration",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Tour date",
-                        "name": "tour_date",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Search by title",
+                        "description": "Search by title and description",
                         "name": "search",
                         "in": "query"
                     },

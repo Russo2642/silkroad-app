@@ -1,4 +1,9 @@
 .idea
 .env
-
 .database
+.exe
+.DS_Store
+.idea
+.env
+.database
+.DS_Store
